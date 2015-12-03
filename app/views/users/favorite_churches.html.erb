@@ -1,0 +1,33 @@
+<h3> Favorite Churches </h3>
+
+<table class="table table-bordered">
+  <thead>
+    <th>Name</th>
+    <th>City</th>
+    <th>Address</th>
+    <th>Zip</th>
+    <th>Actions</th>
+  </thead>
+  <tbody>
+    <% @favorites.try(:each) do |fav| %>
+      <tr>
+        <td>
+          <%= fav.church.name || '' %>
+        </td>
+        <td>
+          <%= fav.church.city || '' %>
+        </td>
+        <td>
+          <%= fav.church.address || '' %>
+        </td>
+        <td>
+          <%= fav.church.zip || '' %>
+        </td>
+        <td>
+          <%= link_to 'Unfavorite', church_favorite_path(fav.church, fav), method: :delete %>
+          <%= link_to "Donate", new_church_donation_path(fav.church) %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
