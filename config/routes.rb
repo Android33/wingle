@@ -24,6 +24,39 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :users do
+        collection do
+          post 'near_users'
+          post 'filter_users'
+        end
+      end
+
+      resources :favourites do
+        collection do
+          post 'all'
+          post 'create'
+          post 'destroy'
+        end
+      end
+
+      resources :user_infos do
+        collection do
+          post 'create'
+        end
+      end
+
+      resources :chats, only: [] do
+        collection do
+          post 'create'
+          post 'by_user'
+        end
+      end
+
+      resources :pokes, only: [] do
+        collection do
+          post 'create'
+        end
+      end
 
     end
   end

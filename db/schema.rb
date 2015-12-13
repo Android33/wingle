@@ -11,10 +11,65 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151203175200) do
+ActiveRecord::Schema.define(version: 20151213143920) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "chats", force: true do |t|
+    t.string   "chat_msg"
+    t.integer  "sender_id"
+    t.integer  "receiver_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "chats_users", id: false, force: true do |t|
+    t.integer "chat_id"
+    t.integer "user_id"
+  end
+
+  add_index "chats_users", ["chat_id", "user_id"], name: "index_chats_users_on_chat_id_and_user_id", using: :btree
+
+  create_table "favourites", force: true do |t|
+    t.integer  "user_id"
+    t.integer  "fav_user_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "favourites", ["user_id"], name: "index_favourites_on_user_id", using: :btree
+
+  create_table "pokes", force: true do |t|
+    t.integer  "user_id"
+    t.integer  "poke_count",    default: 0
+    t.integer  "poked_user_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "pokes", ["user_id"], name: "index_pokes_on_user_id", using: :btree
+
+  create_table "user_infos", force: true do |t|
+    t.integer  "user_id"
+    t.string   "gender",          default: ""
+    t.decimal  "height"
+    t.string   "ethnicity"
+    t.string   "body_type"
+    t.string   "relation_status"
+    t.string   "interested_in"
+    t.text     "about_me"
+    t.string   "wingle_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "city"
+    t.string   "country"
+    t.string   "zipcode"
+    t.string   "address"
+    t.datetime "birthday"
+  end
+
+  add_index "user_infos", ["user_id"], name: "index_user_infos_on_user_id", using: :btree
 
   create_table "users", force: true do |t|
     t.string   "email",                  default: "", null: false
@@ -31,8 +86,10 @@ ActiveRecord::Schema.define(version: 20151203175200) do
     t.datetime "updated_at"
     t.string   "name"
     t.string   "surname"
-    t.integer  "church_id"
     t.string   "authentication_token"
+    t.string   "login_type"
+    t.float    "latitude"
+    t.float    "longitude"
   end
 
   add_index "users", ["authentication_token"], name: "index_users_on_authentication_token", using: :btree

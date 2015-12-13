@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
   # To update the code on server
-  
+
 
 
 
