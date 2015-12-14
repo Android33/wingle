@@ -13,9 +13,9 @@ class Api::V1::SessionsController < ApplicationController
     end
 
     if token.present?
-      render json: {user_token: token, user_email: email}
+      render json: {status: 200, user_token: token, user_email: email}
     else
-      render json: false, status: :unprocessable_entity
+      render json: {status: 401, user_token: nil, user_email: nil}
     end
   end
 end

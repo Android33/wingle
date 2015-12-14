@@ -157,4 +157,31 @@ class Api::V1::UsersController < ApplicationController
     return render :json => {status: 200, users: users_array}
   end
 
+  def login_signup
+    email = params[:user_email]
+    password = params[:user_password]
+
+    user = User.find_by_email(email)
+    token = nil
+    if user
+      if user.valid_password?(password)
+        render json: {status: 200, user_token: user.authentication_token, user_email: email}
+      else
+        render json: {status: 401, user_token: nil, user_email: nil}
+      end
+    else
+      login_type = params[:login_type]
+      newUser = User.new;
+      newUser.email = email+"@"+login_type+".com";
+      newUser.password = password;
+      token = newUser.authentication_token;
+      puts "email: #{newUser.email}"
+      if newUser.save
+        render json: {status: 200, user_token: newUser.authentication_token, user_email: newUser.email}
+      else
+        render json: {status: 401, user_token: "nil", user_email: "Email already exists"}
+      end
+    end
+  end
+
 end

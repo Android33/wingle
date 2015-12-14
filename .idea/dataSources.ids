@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="dataSourceStorage">
+  <data-source name="Rails wingle: development" uuid="b4b25c75-aef5-46e4-9da6-82d982a6488f">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
+  <data-source name="Rails wingle: test" uuid="2a9ca0ee-5961-418d-847e-0c6fe4e7c570">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
+  <data-source name="Rails wingle: production" uuid="e11b5a15-3d74-48ed-85ab-d869487ffc67">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
+</component>

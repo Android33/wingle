@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal">
+    <data-source name="Rails wingle: development" uuid="b4b25c75-aef5-46e4-9da6-82d982a6488f">
+      <first-sync>true</first-sync>
+      <user-name>postgres</user-name>
+      <user-password>dfdadfc5dfd9dfdedfcddfd8dfcfdfd9</user-password>
+    </data-source>
+    <data-source name="Rails wingle: test" uuid="2a9ca0ee-5961-418d-847e-0c6fe4e7c570">
+      <first-sync>true</first-sync>
+      <user-name>postgres</user-name>
+      <user-password>dfdadfc5dfd9dfdedfcddfd8dfcfdfd9</user-password>
+    </data-source>
+    <data-source name="Rails wingle: production" uuid="e11b5a15-3d74-48ed-85ab-d869487ffc67">
+      <first-sync>true</first-sync>
+      <user-name>wingle</user-name>
+      <user-password>df96df8fdf97df8adfefdfe4dffcdff1df8ddfe9dfe2dfffdff8dfe9dfe2df87dfebdffadfe3dff5dfeedfebdffedfebdfe8dfebdff9dfefdff5dffadfebdff9dff9dffddfe5dff8dfeedf8ddff7df8adf8fdf94</user-password>
+    </data-source>
+  </component>
+</project>

@@ -14,13 +14,13 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :sessions, only: [] do
         collection do
-          get '/', to: 'sessions#create'
+          post '/', to: 'sessions#create'
         end
       end
 
       resources :registrations, only: [] do
         collection do
-          get '/', to: 'registrations#create'
+          post '/', to: 'registrations#create'
         end
       end
 
@@ -28,6 +28,7 @@ Rails.application.routes.draw do
         collection do
           post 'near_users'
           post 'filter_users'
+          post 'login_signup'
         end
       end
 
