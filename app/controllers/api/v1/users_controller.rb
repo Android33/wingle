@@ -78,11 +78,6 @@ class Api::V1::UsersController < ApplicationController
       users = User.near([latitude, longitude], distance, :order => "distance")
     end
 
-    if a =0
-    elsif a=1
-    elsif a=3
-    end
-
     users = users.where.not(:id => user.id)
     users_array = []
     flag = true
@@ -158,6 +153,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def login_signup
+    puts params.inspect
     email = params[:user_email]
     password = params[:user_password]
 
@@ -165,19 +161,20 @@ class Api::V1::UsersController < ApplicationController
     token = nil
     if user
       if user.valid_password?(password)
-        render json: {status: 200, user_token: user.authentication_token, user_email: email}
+        render json: {status: 200, user_token: user.authentication_token, user_email: email, login_signup: "login"}
       else
         render json: {status: 401, user_token: nil, user_email: nil}
       end
     else
+      puts "Email already exists"
       login_type = params[:login_type]
       newUser = User.new;
-      newUser.email = email+"@"+login_type+".com";
+      newUser.email = email;
       newUser.password = password;
       token = newUser.authentication_token;
       puts "email: #{newUser.email}"
       if newUser.save
-        render json: {status: 200, user_token: newUser.authentication_token, user_email: newUser.email}
+        render json: {status: 200, user_token: newUser.authentication_token, user_email: newUser.email, login_signup: "signup"}
       else
         render json: {status: 401, user_token: "nil", user_email: "Email already exists"}
       end
