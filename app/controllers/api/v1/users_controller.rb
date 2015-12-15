@@ -177,7 +177,7 @@ class Api::V1::UsersController < ApplicationController
         # update_latlong(params[:user_email], params[:latitude], params[:longitude])
         render json: {status: 200, user_token: newUser.authentication_token, user_email: newUser.email, login_signup: "signup"}
       else
-        render json: {status: 401, user_token: "nil", user_email: "Email already exists", msg: "Could not save the user",email: email, password: password}
+        render json: {status: 401, user_token: "nil", user_email: "Email already exists"}
       end
     end
   end
