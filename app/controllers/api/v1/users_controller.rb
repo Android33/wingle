@@ -161,12 +161,12 @@ class Api::V1::UsersController < ApplicationController
     token = nil
     if user
       if user.valid_password?(password)
+        update_latlong(params[:user_email], params[:latitude], params[:longitude])
         render json: {status: 200, user_token: user.authentication_token, user_email: email, login_signup: "login"}
       else
         render json: {status: 401, user_token: nil, user_email: nil}
       end
     else
-      puts "Email already exists"
       login_type = params[:login_type]
       newUser = User.new;
       newUser.email = email;
@@ -174,6 +174,7 @@ class Api::V1::UsersController < ApplicationController
       token = newUser.authentication_token;
       puts "email: #{newUser.email}"
       if newUser.save
+        update_latlong(params[:user_email], params[:latitude], params[:longitude])
         render json: {status: 200, user_token: newUser.authentication_token, user_email: newUser.email, login_signup: "signup"}
       else
         render json: {status: 401, user_token: "nil", user_email: "Email already exists"}

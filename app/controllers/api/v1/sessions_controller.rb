@@ -1,5 +1,6 @@
 class Api::V1::SessionsController < ApplicationController
   respond_to :json
+  include UsersHelper
 
   def create
     email = params[:user_email]
@@ -13,9 +14,9 @@ class Api::V1::SessionsController < ApplicationController
     end
 
     if token.present?
-      render json: {status: 200, user_token: token, user_email: email}
+      render json: {status: OK_STATUS_CODE, user_token: token, user_email: email}
     else
-      render json: {status: 401, user_token: nil, user_email: nil}
+      render json: {status: UNAUTHORIZED_STATUS_CODE, user_token: nil, user_email: nil}
     end
   end
 end

@@ -16,10 +16,10 @@ class Api::V1::RegistrationsController < ApplicationController
     if newUser.save
       user = User.find_by_email(email)
       token = user.authentication_token
-      render json: {user_token: token, user_email: email}
+      render json: {status: 201, user_token: token, user_email: email}
 
     else
-      render json: {user_token: "nil", user_email: "Email already exists"}
+      render json: {status: 409, user_token: "nil", user_email: "Email already exists"}
     end
 
   end
