@@ -8,7 +8,7 @@ class Api::V1::ChatsController < ApplicationController
     receiver_id = params[:receiver_id]
     chat_msg = params[:chat_msg]
 
-    user = User.find_by_email(email)
+    user = update_latlong(params[:user_email], params[:latitude], params[:longitude])
     receiver = User.find(receiver_id)
     chat = Chat.new
     chat.chat_msg = chat_msg
@@ -27,7 +27,7 @@ class Api::V1::ChatsController < ApplicationController
     email = params[:user_email]
     token = params[:user_token]
 
-    user = User.find_by_email(email)
+    user = update_latlong(params[:user_email], params[:latitude], params[:longitude])
     all_chats = user.chats.all
     sender_ids = all_chats.pluck(:sender_id).uniq
     receiver_ids = all_chats.pluck(:receiver_id).uniq

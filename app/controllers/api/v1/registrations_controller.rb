@@ -12,6 +12,7 @@ class Api::V1::RegistrationsController < ApplicationController
     newUser = User.new;
     newUser.email = email;
     newUser.name = name;
+    newUser.last_sign_in_at = Time.now
     newUser.password = password;
     newUser.login_type = login_type;
     token = newUser.authentication_token;

@@ -14,6 +14,7 @@ class Api::V1::SessionsController < ApplicationController
     end
 
     if token.present?
+      user.last_sign_in_at = Time.now
       if user.userinfo
         info = user.userinfo
         render json: {STATUS_MSG: "USER_INFO_FOUND", STATUS_CODE: OK_STATUS_CODE, user_token: token, user_email: email, name: user.name, gender: info.gender, height: info.height,
