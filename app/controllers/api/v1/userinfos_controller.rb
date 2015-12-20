@@ -1,11 +1,11 @@
-class Api::V1::UserInfosController < ApplicationController
+class Api::V1::UserinfosController < Api::V1::BaseController
   respond_to :json
 
   include UsersHelper
   def create
 
     user = update_latlong(params[:user_email], params[:latitude], params[:longitude])
-    user_info = UserInfo.new
+    user_info = Userinfo.new
 
     user_info.gender = params[:gender]
     user_info.birthday = params[:birthday]

@@ -29,6 +29,7 @@ Rails.application.routes.draw do
           post 'near_users'
           post 'filter_users'
           post 'login_signup'
+          post 'userinfo'
         end
       end
 
@@ -40,7 +41,7 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :user_infos do
+      resources :userinfos do
         collection do
           post 'create'
         end
