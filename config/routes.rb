@@ -51,6 +51,7 @@ Rails.application.routes.draw do
         collection do
           post 'create'
           post 'by_user'
+          post 'with_user'
         end
       end
 

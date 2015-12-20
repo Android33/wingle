@@ -51,4 +51,14 @@ class Api::V1::ChatsController < ApplicationController
     end
     render json: {STATUS_CODE: OK_STATUS_CODE, chats: chats_array}
   end
+
+  def with_user
+    email = params[:user_email]
+    token = params[:user_token]
+
+    user = update_latlong(params[:user_email], params[:latitude], params[:longitude])
+    chat_user_id = params[:chat_user_id]
+    chats = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user_id, chat_user_id)
+    render json: {STATUS_CODE: OK_STATUS_CODE, chats: chats}
+  end
 end
