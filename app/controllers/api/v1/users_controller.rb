@@ -99,7 +99,7 @@ class Api::V1::UsersController < ApplicationController
 
         # Means only city parameter exists not the age
       elsif age_city == 2
-        user_info = users.find(near_user.id).user_info
+        user_info = users.find(near_user.id).userinfo
         if user_info
           puts "user_info.city: #{user_info.city} city: #{city}"
           # Equal ignore case syntax city.casecmp(user_info.city).zero? will return true when strings equal
