@@ -1,5 +1,6 @@
 class Api::V1::ChatsController < Api::V1::BaseController
   respond_to :json
+  include UsersHelper
 
   def create
     email = params[:user_email]
@@ -19,7 +20,7 @@ class Api::V1::ChatsController < Api::V1::BaseController
 
 
     receiver.chats << chat
-    render json: {status: 200, chat_id: chat.id}
+    render json: {STATUS_CODE: OK_STATUS_CODE, chat_id: chat.id}
   end
 
   def by_user
@@ -48,6 +49,6 @@ class Api::V1::ChatsController < Api::V1::BaseController
 #      chats_array["chat_user_email"] = chat_user.email
       chats_array << chat_object
     end
-    render json: {status: 200, chats: chats_array}
+    render json: {STATUS_CODE: OK_STATUS_CODE, chats: chats_array}
   end
 end

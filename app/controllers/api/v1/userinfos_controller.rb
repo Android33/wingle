@@ -2,9 +2,16 @@ class Api::V1::UserinfosController < Api::V1::BaseController
   respond_to :json
 
   include UsersHelper
+
   def create
 
     user = update_latlong(params[:user_email], params[:latitude], params[:longitude])
+    name = params[:name]
+    if (name.present?)
+      puts "name #{name}"
+      user.name = params[:name]
+      user.save
+    end
     user_info = Userinfo.new
 
     user_info.gender = params[:gender]
@@ -22,6 +29,6 @@ class Api::V1::UserinfosController < Api::V1::BaseController
     user_info.user_id = user.id
 
     user_info.save
-    render json: {status: 200}
+    render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info}
   end
 end

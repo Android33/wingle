@@ -11,7 +11,7 @@ class Api::V1::FavouritesController < Api::V1::BaseController
     fav.fav_user_id = params[:fav_user_id]
     fav.save
 
-    return render :json=> {status: 200, fav_user: fav}
+    return render :json=> {STATUS_CODE: OK_STATUS_CODE, fav_user: fav}
   end
 
   def destroy
@@ -19,7 +19,7 @@ class Api::V1::FavouritesController < Api::V1::BaseController
     fav = user.favourites.where(:fav_user_id => params[:fav_user_id])
     fav.destroy_all
 
-    return render :json=> {status: 200}
+    return render :json=> {STATUS_CODE: OK_STATUS_CODE}
   end
 
   def all
@@ -44,25 +44,6 @@ class Api::V1::FavouritesController < Api::V1::BaseController
       users_array << user_object
     end
 
-    return render :json=> {status: 200, users: users_array}
+    return render :json=> {STATUS_CODE: OK_STATUS_CODE, users: users_array}
   end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 end

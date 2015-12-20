@@ -11,6 +11,6 @@ class Api::V1::PokesController < Api::V1::BaseController
     poke.poked_user_id = params[:poked_user_id]
     poke.save
 
-    return render :json=> {status: 200, poked_user: poke}
+    return render :json=> {STATUS_CODE: OK_STATUS_CODE, poked_user: poke}
   end
 end

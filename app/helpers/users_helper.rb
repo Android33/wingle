@@ -10,7 +10,8 @@ module UsersHelper
     return user
   end
 
-  STATUS_MSG = "status_message"
+  USER_INFO_FOUND = "USER_INFO_FOUND";
+  NO_USER_INFO = "NO_USER_INFO";
   # //2xx Success
   # /**
   #  * Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request, the response will contain an entity describing or containing the result of the action
