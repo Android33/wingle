@@ -1,4 +1,4 @@
-class Api::V1::ChatsController < Api::V1::BaseController
+class Api::V1::ChatsController < ApplicationController
   respond_to :json
   include UsersHelper
 

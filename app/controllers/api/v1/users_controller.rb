@@ -181,8 +181,10 @@ class Api::V1::UsersController < ApplicationController
       end
     else
       login_type = params[:login_type]
+      name = params[:name]
       newUser = User.new;
       newUser.email = email;
+      newUser.name = name;
       newUser.password = password;
       token = newUser.authentication_token;
       if newUser.save
