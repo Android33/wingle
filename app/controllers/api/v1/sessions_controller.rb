@@ -31,4 +31,15 @@ class Api::V1::SessionsController < ApplicationController
       render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE, user_token: nil, user_email: nil}
     end
   end
+
+  def destroy
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    user.authentication_token = nil
+    user.save
+
+    return render :json=> {STATUS_CODE: OK_STATUS_CODE}
+  end
 end

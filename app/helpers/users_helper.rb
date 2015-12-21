@@ -1,17 +1,12 @@
 module UsersHelper
 
-  def update_latlong(user_email, lat, lon)
-
-    user = User.find_by_email(user_email)
+  def update_latlong(user, lat, lon)
     user.last_sign_in_at = Time.now
     if (lat && lon)
       user.latitude = lat
       user.longitude = lon
     end
-
     user.save
-    # return :json => true
-    return user
   end
 
   USER_INFO_FOUND = "USER_INFO_FOUND";

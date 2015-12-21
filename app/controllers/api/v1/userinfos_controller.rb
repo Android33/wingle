@@ -1,12 +1,16 @@
-class Api::V1::UserinfosController < Api::V1::BaseController
-  before_action :authenticate_user!
+class Api::V1::UserinfosController < ApplicationController
   respond_to :json
 
   include UsersHelper
 
   def create
 
-    user = update_latlong(params[:user_email], params[:latitude], params[:longitude])
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
     name = params[:name]
     if (name.present?)
       puts "name #{name}"

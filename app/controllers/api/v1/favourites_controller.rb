@@ -1,12 +1,16 @@
 #if you want to authenticate your controller use below line of code
 #class Api::V1::UsersController < Api::V1::BaseController
-class Api::V1::FavouritesController < Api::V1::BaseController
-  before_action :authenticate_user!
+class Api::V1::FavouritesController < ApplicationController
 
   include UsersHelper
 
   def create
-    user = update_latlong(params[:user_email], params[:latitude], params[:longitude])
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
     fav = user.favourites.new
     fav.fav_user_id = params[:fav_user_id]
     fav.save
@@ -15,7 +19,12 @@ class Api::V1::FavouritesController < Api::V1::BaseController
   end
 
   def destroy
-    user = update_latlong(params[:user_email], params[:latitude], params[:longitude])
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
     fav = user.favourites.where(:fav_user_id => params[:fav_user_id])
     fav.destroy_all
 
@@ -23,7 +32,12 @@ class Api::V1::FavouritesController < Api::V1::BaseController
   end
 
   def all
-    user = update_latlong(params[:user_email], params[:latitude], params[:longitude])
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
     user_ids = user.favourites.all.pluck(:fav_user_id)
     users_array = []
 

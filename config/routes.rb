@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       resources :sessions, only: [] do
         collection do
           post '/', to: 'sessions#create'
+          post 'destroy'
         end
       end
 

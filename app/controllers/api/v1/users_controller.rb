@@ -14,7 +14,11 @@ class Api::V1::UsersController < ApplicationController
 
   def near_users
 
-    user = update_latlong(params[:user_email], params[:latitude], params[:longitude])
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
 
     latitude = params[:latitude]
     longitude = params[:longitude]
@@ -51,7 +55,11 @@ class Api::V1::UsersController < ApplicationController
 
   def filter_users
 
-    user = update_latlong(params[:user_email], params[:latitude], params[:longitude])
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
 
     latitude = params[:latitude]
     longitude = params[:longitude]
