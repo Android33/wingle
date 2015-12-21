@@ -1,7 +1,7 @@
 #if you want to authenticate your controller use below line of code
 #class Api::V1::UsersController < Api::V1::BaseController
-class Api::V1::FavouritesController < ApplicationController
-  # before_action :authenticate_user!
+class Api::V1::FavouritesController < Api::V1::BaseController
+  before_action :authenticate_user!
 
   include UsersHelper
 

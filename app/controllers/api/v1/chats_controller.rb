@@ -1,4 +1,5 @@
-class Api::V1::ChatsController < ApplicationController
+class Api::V1::ChatsController < Api::V1::BaseController
+  before_action :authenticate_user!
   respond_to :json
   include UsersHelper
 
@@ -20,7 +21,7 @@ class Api::V1::ChatsController < ApplicationController
 
 
     receiver.chats << chat
-    render json: {STATUS_CODE: OK_STATUS_CODE, chat_id: chat.id}
+    render json: {STATUS_CODE: OK_STATUS_CODE, chat: chat}
   end
 
   def by_user
@@ -49,7 +50,7 @@ class Api::V1::ChatsController < ApplicationController
 #      chats_array["chat_user_email"] = chat_user.email
       chats_array << chat_object
     end
-    render json: {STATUS_CODE: OK_STATUS_CODE, chats: chats_array}
+    render json: {STATUS_CODE: OK_STATUS_CODE, all_chats: chats_array}
   end
 
   def with_user
@@ -59,6 +60,6 @@ class Api::V1::ChatsController < ApplicationController
     user = update_latlong(params[:user_email], params[:latitude], params[:longitude])
     chat_user_id = params[:chat_user_id]
     chats = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user_id, chat_user_id)
-    render json: {STATUS_CODE: OK_STATUS_CODE, chats: chats}
+    render json: {STATUS_CODE: OK_STATUS_CODE, chat: chats}
   end
 end

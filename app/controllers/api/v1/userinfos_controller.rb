@@ -1,4 +1,5 @@
-class Api::V1::UserinfosController < ApplicationController
+class Api::V1::UserinfosController < Api::V1::BaseController
+  before_action :authenticate_user!
   respond_to :json
 
   include UsersHelper
