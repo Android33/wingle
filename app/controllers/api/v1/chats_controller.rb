@@ -1,4 +1,5 @@
-class Api::V1::ChatsController < ApplicationController
+class Api::V1::ChatsController < Api::V1::BaseController
+  # before_action :authenticate_user!
   respond_to :json
   include UsersHelper
 
@@ -49,7 +50,7 @@ class Api::V1::ChatsController < ApplicationController
 #      chats_array["chat_user_email"] = chat_user.email
       chats_array << chat_object
     end
-    render json: {STATUS_CODE: OK_STATUS_CODE, chats: chats_array}
+    render json: {STATUS_CODE: OK_STATUS_CODE, all_chats: chats_array}
   end
 
   def with_user
