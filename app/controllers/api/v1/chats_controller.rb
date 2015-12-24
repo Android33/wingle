@@ -80,7 +80,7 @@ class Api::V1::ChatsController < ApplicationController
       chat_object["chat_user_name"] = chat_user.name
       chat_object["chat_user_email"] = chat_user.email
       chat_object["chat_user_id"] = chat_user.id
-      chat_object["last_chat"] = chats
+      chat_object["last_msg"] = chats
 #      chats_array["chat_user_email"] = chat_user.email
       chats_array << chat_object
     end
@@ -94,8 +94,9 @@ class Api::V1::ChatsController < ApplicationController
     end
     update_latlong(user, params[:latitude], params[:longitude])
 
-    chat_user_id = params[:chat_user_id]
-    chats = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user_id, chat_user_id)
-    render json: {STATUS_CODE: OK_STATUS_CODE, chat: chats}
+    chat_user = User.find(params[:chat_user_id])
+    chats = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user.id, chat_user.id)
+    render json: {STATUS_CODE: OK_STATUS_CODE,chat_user_name: chat_user.name,
+                  chat_user_email: chat_user.email,chat_user_id: chat_user.id, chat: chats}
   end
 end
