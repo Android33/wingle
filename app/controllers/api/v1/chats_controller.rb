@@ -19,10 +19,11 @@ class Api::V1::ChatsController < ApplicationController
     chat.save
 
     user.chats << chat
-
-
     receiver.chats << chat
-    render json: {STATUS_CODE: OK_STATUS_CODE, chat: chat}
+
+    chats = user.chats.where("sender_id = ? OR receiver_id = ?", receiver.id, receiver.id)
+
+    render json: {STATUS_CODE: OK_STATUS_CODE, chat: chat, chats: chats}
   end
 
   def by_user_all
@@ -77,6 +78,12 @@ class Api::V1::ChatsController < ApplicationController
       chats = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user_id.to_i, chat_user_id.to_i).last
       chat_user = User.find(chat_user_id)
       chat_object = {}
+      minutes = ((Time.now - chat_user.last_sign_in_at) / 1.minute).round
+      if minutes < 10
+        chat_object["is_online"] = true
+      else
+        chat_object["is_online"] = false
+      end
       chat_object["chat_user_name"] = chat_user.name
       chat_object["chat_user_email"] = chat_user.email
       chat_object["chat_user_id"] = chat_user.id
@@ -84,6 +91,7 @@ class Api::V1::ChatsController < ApplicationController
 #      chats_array["chat_user_email"] = chat_user.email
       chats_array << chat_object
     end
+
     render json: {STATUS_CODE: OK_STATUS_CODE, chats: chats_array}
   end
 
@@ -96,7 +104,16 @@ class Api::V1::ChatsController < ApplicationController
 
     chat_user = User.find(params[:chat_user_id])
     chats = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user.id, chat_user.id)
-    render json: {STATUS_CODE: OK_STATUS_CODE,chat_user_name: chat_user.name,
-                  chat_user_email: chat_user.email,chat_user_id: chat_user.id, chat: chats}
+
+    minutes = ((Time.now - chat_user.last_sign_in_at) / 1.minute).round
+    if minutes < 10
+      is_online = true
+    else
+      is_online = false
+    end
+
+
+    render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: chat_user.name,
+                  chat_user_email: chat_user.email, is_online: is_online, chat_user_id: chat_user.id, chat: chats}
   end
 end

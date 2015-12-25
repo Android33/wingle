@@ -20,6 +20,7 @@ class Api::V1::RegistrationsController < ApplicationController
     if newUser.save
       user = User.find_by_email(email)
       token = user.authentication_token
+      update_latlong(user, params[:latitude], params[:longitude])
       render json: {STATUS_CODE: CREATED_STATUS_CODE, user_token: token, user_email: email, name: name}
 
     else
