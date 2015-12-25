@@ -169,6 +169,7 @@ class Api::V1::UsersController < ApplicationController
     token = nil
     if user
       if user.valid_password?(password)
+        puts "inside valid password"
         update_latlong(user, params[:latitude], params[:longitude])
         if user.userinfo
           info = user.userinfo
@@ -189,6 +190,7 @@ class Api::V1::UsersController < ApplicationController
       end
     else
       login_type = params[:login_type]
+      puts "inside new"
       name = params[:name]
       newUser = User.new;
       newUser.email = email;
@@ -196,7 +198,7 @@ class Api::V1::UsersController < ApplicationController
       newUser.password = password;
       token = newUser.authentication_token;
       if newUser.save
-        update_latlong(user, params[:latitude], params[:longitude])
+        update_latlong(newUser, params[:latitude], params[:longitude])
         render json: {STATUS_CODE: OK_STATUS_CODE, user_token: newUser.authentication_token, user_email: newUser.email, login_signup: "signup"}
       else
         render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE, user_token: nil, user_email: nil}
