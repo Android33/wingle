@@ -31,7 +31,7 @@ class Api::V1::ChatsController < ApplicationController
     chats = user.chats.where("sender_id = ? OR receiver_id = ?", receiver.id, receiver.id)
 
     render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: receiver.name,
-                  chat_user_email: receiver.email, is_online: is_online, chat_user_id: receiver.id, chats: chats}
+                  chat_user_email: receiver.email, is_online: is_online, chat_user_id: receiver.id, chat: chats}
   end
 
   def by_user_all
