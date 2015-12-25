@@ -21,9 +21,17 @@ class Api::V1::ChatsController < ApplicationController
     user.chats << chat
     receiver.chats << chat
 
+    minutes = ((Time.now - receiver.last_sign_in_at) / 1.minute).round
+    if minutes < 10
+      is_online = true
+    else
+      is_online = false
+    end
+
     chats = user.chats.where("sender_id = ? OR receiver_id = ?", receiver.id, receiver.id)
 
-    render json: {STATUS_CODE: OK_STATUS_CODE, chat: chat, chats: chats}
+    render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: receiver.name,
+                  chat_user_email: receiver.email, is_online: is_online, chat_user_id: receiver.id, chats: chats}
   end
 
   def by_user_all
