@@ -31,6 +31,8 @@ Rails.application.routes.draw do
           post 'filter_users'
           post 'login_signup'
           post 'userinfo'
+          post 'search_with_wingle_id'
+          post 'search_with_email_id'
         end
       end
 

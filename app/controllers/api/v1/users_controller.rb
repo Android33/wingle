@@ -206,4 +206,37 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
+  def search_with_wingle_id
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+    searched_user_ids = Userinfo.where(:wingle_id => params[:wingle_id]).pluck(:user_id)
+    if searched_user_ids.empty?
+      render json: {STATUS_CODE: NOT_FOUND_STATUS_CODE, user_id: nil, user_email: nil, user_name: nil, wingle_id: nil}
+    else
+      searched_user = User.find(searched_user_ids[0])
+      render json: {STATUS_CODE: OK_STATUS_CODE, user_id: searched_user.id,
+                    user_email: searched_user.email, user_name: searched_user.name, wingle_id: params[:wingle_id]}
+    end
+
+  end
+
+  def search_with_email_id
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+    searched_user = User.find_by_email(params[:email_id])
+    if searched_user
+      render json: {STATUS_CODE: OK_STATUS_CODE, user_id: searched_user.id,
+                    user_email: searched_user.email, user_name: searched_user.name}
+    else
+      render json: {STATUS_CODE: NOT_FOUND_STATUS_CODE, user_id: nil, user_email: nil, user_name: nil}
+    end
+
+  end
+
 end

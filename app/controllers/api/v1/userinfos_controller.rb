@@ -1,6 +1,7 @@
 class Api::V1::UserinfosController < ApplicationController
   respond_to :json
 
+
   include UsersHelper
 
   def create
@@ -17,7 +18,15 @@ class Api::V1::UserinfosController < ApplicationController
       user.name = params[:name]
       user.save
     end
-    user_info = Userinfo.new
+    if user.userinfo
+      user_info = user.userinfo
+    else
+      user_info = Userinfo.new
+      user_info.user_id = user.id
+    end
+
+    # InviteMailer.invit_email().deliver
+
 
     user_info.gender = params[:gender]
     user_info.birthday = params[:birthday]
@@ -27,11 +36,10 @@ class Api::V1::UserinfosController < ApplicationController
     user_info.relation_status = params[:relation_status]
     user_info.interested_in = params[:interested_in]
     user_info.about_me = params[:about_me]
-    user_info.wingle_id = params[:wingle_id]
+
     user_info.city = params[:city]
     user_info.country = params[:country]
     user_info.zipcode = params[:zipcode]
-    user_info.user_id = user.id
 
     user_info.save
     render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info}
