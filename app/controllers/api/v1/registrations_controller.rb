@@ -21,10 +21,10 @@ class Api::V1::RegistrationsController < ApplicationController
       user = User.find_by_email(email)
       token = user.authentication_token
       update_latlong(user, params[:latitude], params[:longitude])
-      render json: {STATUS_CODE: CREATED_STATUS_CODE, user_token: token, user_email: email, name: name}
+      render json: {STATUS_MSG: "NO_USER_INFO", STATUS_CODE: CREATED_STATUS_CODE, user_token: token, user_email: email, name: name}
 
     else
-      render json: {STATUS_CODE: CONFLICT_STATUS_CODE, user_token: "nil", user_email: nil, name: name}
+      render json: {STATUS_MSG: "NO_USER_INFO", STATUS_CODE: CONFLICT_STATUS_CODE, user_token: "nil", user_email: nil, name: name}
     end
 
   end
