@@ -4,6 +4,7 @@ class Api::V1::UsersController < ApplicationController
   # before_action :authenticate_user!
 
   include UsersHelper
+  # include c
 
   def index
   end
@@ -37,6 +38,47 @@ class Api::V1::UsersController < ApplicationController
         user_object["is_online"] = true
       else
         user_object["is_online"] = false
+      end
+      user_object["id"] = near_user.id
+      user_object["name"] = near_user.name
+      user_object["surname"] = near_user.surname
+
+      if user.favourites.where(:fav_user_id => near_user.id).count > 0
+        user_object["is_favourite"] = true
+      else
+        user_object["is_favourite"] = false
+      end
+      users_array << user_object
+    end
+
+    return render :json => {STATUS_CODE: OK_STATUS_CODE, users: users_array}
+  end
+
+  def online_users
+
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
+    latitude = params[:latitude]
+    longitude = params[:longitude]
+    #    distance = params[:distance]
+    #    hardcode distance 50 km
+    distance = 100
+    users = User.near([latitude, longitude], distance, :order => "distance")
+    users = users.where.not(:id => user.id)
+
+    users_array = []
+
+    users && users.each do |near_user|
+      minutes = ((Time.now - near_user.last_sign_in_at) / 1.minute).round
+      user_object = {}
+      if minutes < 10
+        user_object["is_online"] = true
+      else
+        next
       end
       user_object["id"] = near_user.id
       user_object["name"] = near_user.name
@@ -236,7 +278,16 @@ class Api::V1::UsersController < ApplicationController
     else
       render json: {STATUS_CODE: NOT_FOUND_STATUS_CODE, user_id: nil, user_email: nil, user_name: nil}
     end
+  end
 
+  def invite
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+    InviteMailer.invit_email(params[:email_to]).deliver
+    render json: {STATUS_CODE: OK_STATUS_CODE}
   end
 
 end

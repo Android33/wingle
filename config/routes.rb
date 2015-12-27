@@ -33,6 +33,8 @@ Rails.application.routes.draw do
           post 'userinfo'
           post 'search_with_wingle_id'
           post 'search_with_email_id'
+          post 'invite'
+          post 'online_users'
         end
       end
 
@@ -45,6 +47,18 @@ Rails.application.routes.draw do
       end
 
       resources :userinfos do
+        collection do
+          post 'create'
+        end
+      end
+
+      resources :gsettings do
+        collection do
+          post 'create'
+        end
+      end
+
+      resources :nsettings do
         collection do
           post 'create'
         end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151219155611) do
+ActiveRecord::Schema.define(version: 20151226100522) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -39,6 +39,30 @@ ActiveRecord::Schema.define(version: 20151219155611) do
   end
 
   add_index "favourites", ["user_id"], name: "index_favourites_on_user_id", using: :btree
+
+  create_table "gsettings", force: true do |t|
+    t.integer  "user_id"
+    t.boolean  "sound",        default: true
+    t.boolean  "vibration",    default: true
+    t.boolean  "notification", default: true
+    t.boolean  "led",          default: true
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "gsettings", ["user_id"], name: "index_gsettings_on_user_id", using: :btree
+
+  create_table "nsettings", force: true do |t|
+    t.integer  "user_id"
+    t.boolean  "favorite_me",  default: true
+    t.boolean  "msg_alert",    default: true
+    t.boolean  "wingle_alert", default: true
+    t.boolean  "member_alert", default: true
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "nsettings", ["user_id"], name: "index_nsettings_on_user_id", using: :btree
 
   create_table "pokes", force: true do |t|
     t.integer  "user_id"

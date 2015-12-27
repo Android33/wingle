@@ -1,6 +1,8 @@
 class User < ActiveRecord::Base
 
   has_one :userinfo
+  has_one :gsetting
+  has_one :nsetting
   has_many :pokes
   has_many :favourites
   has_and_belongs_to_many :chats

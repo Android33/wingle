@@ -1,4 +1,4 @@
-class Api::V1::UserinfosController < ApplicationController
+class Api::V1::Gsettings < ApplicationController
   respond_to :json
 
 
@@ -39,6 +39,6 @@ class Api::V1::UserinfosController < ApplicationController
     user_info.zipcode = params[:zipcode]
 
     user_info.save
-    render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info}
+    render json: {STATUS_CODE: C::OK_STATUS_CODE, user: user, user_info: user_info}
   end
 end
