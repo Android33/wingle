@@ -35,6 +35,8 @@ Rails.application.routes.draw do
           post 'search_with_email_id'
           post 'invite'
           post 'online_users'
+          post 'set_gcm_token'
+          post 'test_gcm'
         end
       end
 
@@ -54,13 +56,15 @@ Rails.application.routes.draw do
 
       resources :gsettings do
         collection do
-          post 'create'
+          post 'update'
+          post 'get'
         end
       end
 
       resources :nsettings do
         collection do
-          post 'create'
+          post 'update'
+          post 'get'
         end
       end
 

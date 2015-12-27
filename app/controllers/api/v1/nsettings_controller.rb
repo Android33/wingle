@@ -19,8 +19,10 @@ class Api::V1::NsettingsController < ApplicationController
       nsetting.user_id = user.id
     end
 
-    nsetting.gender = params[:gender]
-
+    nsetting.favorite_me = params[:favorite_me]
+    nsetting.msg_alert = params[:msg_alert]
+    nsetting.wingle_alert = params[:wingle_alert]
+    nsetting.member_alert = params[:member_alert]
 
     nsetting.save
     render json: {STATUS_CODE: OK_STATUS_CODE, nsetting: nsetting}
@@ -35,11 +37,9 @@ class Api::V1::NsettingsController < ApplicationController
     update_latlong(user, params[:latitude], params[:longitude])
 
     if user.nsetting
-      render json: {STATUS_CODE: OK_STATUS_CODE, nsetting: user.nsetting}
+      render json: {STATUS_CODE: C::OK_STATUS_CODE, STATUS_MSG: C::SUCCESS_STATUS_MSG, nsetting: user.nsetting}
     else
-      render json: {STATUS_CODE: NOT_FOUND_STATUS_CODE, nsetting: nil}
+      render json: {STATUS_CODE: C::NOT_FOUND_STATUS_CODE, STATUS_MSG: C::FAILURE_STATUS_MSG, nsetting: nil}
     end
-
-
   end
 end

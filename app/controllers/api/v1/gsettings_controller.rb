@@ -1,10 +1,10 @@
-class Api::V1::Gsettings < ApplicationController
+class Api::V1::GsettingsController < ApplicationController
   respond_to :json
 
 
   include UsersHelper
 
-  def create
+  def update
 
     user = User.find_by_email(params[:user_email])
     if params[:user_token] != user.authentication_token
@@ -12,33 +12,34 @@ class Api::V1::Gsettings < ApplicationController
     end
     update_latlong(user, params[:latitude], params[:longitude])
 
-    name = params[:name]
-    if (name.present?)
-      puts "name #{name}"
-      user.name = params[:name]
-      user.save
-    end
-    if user.userinfo
-      user_info = user.userinfo
+    if user.gsetting
+      gsetting = user.gsetting
     else
-      user_info = Userinfo.new
-      user_info.user_id = user.id
+      gsetting = Gsetting.new
+      gsetting.user_id = user.id
     end
 
-    user_info.gender = params[:gender]
-    user_info.birthday = params[:birthday]
-    user_info.height = params[:height]
-    user_info.ethnicity = params[:ethnicity]
-    user_info.body_type = params[:body_type]
-    user_info.relation_status = params[:relation_status]
-    user_info.interested_in = params[:interested_in]
-    user_info.about_me = params[:about_me]
+    gsetting.sound = params[:sound]
+    gsetting.vibration = params[:vibration]
+    gsetting.notification = params[:notification]
+    gsetting.led = params[:led]
+    gsetting.save
 
-    user_info.city = params[:city]
-    user_info.country = params[:country]
-    user_info.zipcode = params[:zipcode]
+    render json: {STATUS_CODE: OK_STATUS_CODE, gsetting: gsetting}
+  end
 
-    user_info.save
-    render json: {STATUS_CODE: C::OK_STATUS_CODE, user: user, user_info: user_info}
+  def get
+
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
+    if user.gsetting
+      render json: {STATUS_CODE: C::OK_STATUS_CODE, STATUS_MSG: C::SUCCESS_STATUS_MSG, nsetting: user.gsetting}
+    else
+      render json: {STATUS_CODE: C::NOT_FOUND_STATUS_CODE, STATUS_MSG: C::FAILURE_STATUS_MSG, gsetting: nil}
+    end
   end
 end

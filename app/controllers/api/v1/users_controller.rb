@@ -290,4 +290,39 @@ class Api::V1::UsersController < ApplicationController
     render json: {STATUS_CODE: OK_STATUS_CODE}
   end
 
+  def set_gcm_token
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+    user.gcm_token = params[:gcm_token]
+    user.save
+    render json: {STATUS_CODE: OK_STATUS_CODE, STATUS_MSG: C::SUCCESS_STATUS_MSG}
+  end
+
+  def test_gcm
+    send_gcm_message("title", "body", "cGLdhej3-Rk:APA91bEbLW0tDg8_e_rwniFThdyBf2446liMUJKlD1hUM7Ram38shCYhFIG14JCimTpO0D3PBC75PcuPl64MI2d8IkqaIjFBCWzme7siWcxi-gnV1dTbE7yr6TUmmaN7V2fcBDp8oFpX")
+    render json: {STATUS_CODE: OK_STATUS_CODE, STATUS_MSG: C::SUCCESS_STATUS_MSG}
+  end
+
+
+  def send_gcm_message(title, body, reg_tokens)
+    require 'rest-client'
+    # Construct JSON payload
+    post_args = {
+        # :to field can also be used if there is only 1 reg token to send
+        :registration_ids => reg_tokens,
+        :data => {
+            :title  => title,
+            :body => body,
+            :anything => "foobar"
+        }
+    }
+
+    # Send the request with JSON args and headers
+    RestClient.post 'https://gcm-http.googleapis.com/gcm/send', post_args.to_json,
+                    :Authorization => 'key=' + C::AUTHORIZE_KEY, :content_type => :json, :accept => :json
+  end
+
 end
