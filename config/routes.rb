@@ -37,6 +37,7 @@ Rails.application.routes.draw do
           post 'online_users'
           post 'set_gcm_token'
           post 'test_gcm'
+          post 'test'
         end
       end
 
@@ -45,6 +46,13 @@ Rails.application.routes.draw do
           post 'all'
           post 'create'
           post 'destroy'
+        end
+      end
+
+      resources :images do
+        collection do
+          post 'upload_img'
+          post 'upload_img_url'
         end
       end
 

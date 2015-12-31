@@ -5,15 +5,14 @@ source 'https://rubygems.org'
 gem 'rails', '4.1.2'
 # Use postgresql as the database for Active Record
 gem 'pg'
+# for sending requests to other servers
 gem 'rest-client'
+# for handling gcm
+gem 'gcm'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 4.0.3'
-# for file handling
-gem 'carrierwave'
-gem 'carrierwave-base64'
-gem 'carrierwave_direct'
-# for uploading files to amazon server
-gem 'fog-aws'
+# for image uploading
+gem 'carrierwave-aws'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
 # Use CoffeeScript for .js.coffee assets and views

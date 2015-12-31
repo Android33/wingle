@@ -98,7 +98,7 @@ class Api::V1::UsersController < ApplicationController
   def filter_users
 
     user = User.find_by_email(params[:user_email])
-    if params[:user_token] != user.authentication_token
+    if !user || params[:user_token] != user.authentication_token
       return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
     end
     update_latlong(user, params[:latitude], params[:longitude])
@@ -122,60 +122,48 @@ class Api::V1::UsersController < ApplicationController
     # age_city 3 when both age and city
     puts "age_city: #{age_city}"
 
-    if !distance || distance == 0
+    if !distance || distance == 0 || distance == "0"
       users = User.all
+      puts "inside distance 0"
     else
       users = User.near([latitude, longitude], distance, :order => "distance")
     end
 
     users = users.where.not(:id => user.id)
+    # puts "users: #{users.count}"
     users_array = []
-    flag = true
     users && users.each do |near_user|
       user_object = {}
+      puts "name: #{near_user.name}"
+      user_object["id"] = near_user.id
+      user_object["name"] = near_user.name
+      user_info = users.find(near_user.id).userinfo
+      if !user_info
+        next
+      end
       # Means only age parameter exists not the city
-      if age_city == 1
-        user_info = users.find(near_user.id).user_info
-        if user_info
-          if user_info.birthday
-            user_age = ((Time.now - user_info.birthday) / 1.year).round
-            puts "age: #{age} user_age: #{user_age}"
-            next if age != user_age
-          end
-        else
-          next
-        end
-
+      if age_city == 1 && user_info.birthday
+        user_age = ((Time.now - user_info.birthday) / 1.year).round
+        puts "age: #{age} user_age: #{user_age}"
+        next if age.to_i != user_age
 
         # Means only city parameter exists not the age
       elsif age_city == 2
-        user_info = users.find(near_user.id).userinfo
-        if user_info
-          puts "user_info.city: #{user_info.city} city: #{city}"
-          # Equal ignore case syntax city.casecmp(user_info.city).zero? will return true when strings equal
-          next if user_info.city && !city.casecmp(user_info.city).zero?
-        else
-          next
-        end
+        puts "Means only city parameter exists not the age"
+        puts "user_info.city: #{user_info.city} city: #{city}"
+        # Equal ignore case syntax city.casecmp(user_info.city).zero? will return true when strings equal
+        next if !city.casecmp(user_info.city).zero?
 
         # Means both parameters exists age and city
-      elsif age_city == 3
-        user_info = users.find(near_user.id).user_info
-        if user_info
-          if user_info.birthday
-            user_age = ((Time.now - user_info.birthday) / 1.year).round
-            puts "age: #{age.to_i.class} user_age: #{user_age.class}"
-            next if age.to_i != user_age
-            puts "after next age: #{age.to_i.class} user_age: #{user_age.class}"
-          end
-          puts "before user_info.city: #{user_info.city} city: #{city}"
-          next if user_info.city && !city.casecmp(user_info.city).zero?
-          puts "after user_info.city: #{user_info.city} city: #{city}"
-        else
-          next
-        end
-      else
-        next
+      elsif age_city == 3 && user_info.birthday && user_info.city
+        user_age = ((Time.now - user_info.birthday) / 1.year).round
+        puts "age: #{age.to_i.class} user_age: #{user_age.class}"
+        next if age.to_i != user_age
+        puts "after next age: #{age.to_i.class} user_age: #{user_age.class}"
+
+        puts "before user_info.city: #{user_info.city} city: #{city}"
+        next if !city.casecmp(user_info.city).zero?
+        puts "after user_info.city: #{user_info.city} city: #{city}"
       end
 
       puts "after checks"
@@ -186,9 +174,6 @@ class Api::V1::UsersController < ApplicationController
       else
         user_object["is_online"] = false
       end
-      user_object["id"] = near_user.id
-      user_object["name"] = near_user.name
-      user_object["surname"] = near_user.surname
 
       if user.favourites.where(:fav_user_id => near_user.id).count > 0
         user_object["is_favourite"] = true
@@ -303,7 +288,7 @@ class Api::V1::UsersController < ApplicationController
 
   def test_gcm
     send_gcm_message("title", "body", "cGLdhej3-Rk:APA91bEbLW0tDg8_e_rwniFThdyBf2446liMUJKlD1hUM7Ram38shCYhFIG14JCimTpO0D3PBC75PcuPl64MI2d8IkqaIjFBCWzme7siWcxi-gnV1dTbE7yr6TUmmaN7V2fcBDp8oFpX")
-    render json: {STATUS_CODE: OK_STATUS_CODE, STATUS_MSG: C::SUCCESS_STATUS_MSG}
+
   end
 
 
@@ -314,15 +299,41 @@ class Api::V1::UsersController < ApplicationController
         # :to field can also be used if there is only 1 reg token to send
         :registration_ids => reg_tokens,
         :data => {
-            :title  => title,
+            :title => title,
             :body => body,
             :anything => "foobar"
         }
     }
 
     # Send the request with JSON args and headers
-    RestClient.post 'https://gcm-http.googleapis.com/gcm/send', post_args.to_json,
+    RestClient.post 'http://gcm-http.googleapis.com/gcm/send', post_args.to_json,
                     :Authorization => 'key=' + C::AUTHORIZE_KEY, :content_type => :json, :accept => :json
+    render json: {STATUS_CODE: OK_STATUS_CODE, STATUS_MSG: C::SUCCESS_STATUS_MSG}
+
+    #  require 'gcm'
+    #
+    #     gcm = GCM.new(C::AUTHORIZE_KEY)
+    # # you can set option parameters in here
+    # #  - all options are pass to HTTParty method arguments
+    # #  - ref: https://github.com/jnunemaker/httparty/blob/master/lib/httparty.rb#L40-L68
+    # #  gcm = GCM.new("my_api_key", timeout: 3)
+    #
+    #     registration_ids= [ "cGLdhej3-Rk:APA91bEbLW0tDg8_e_rwniFThdyBf2446liMUJKlD1hUM7Ram38shCYhFIG14JCimTpO0D3PBC75PcuPl64MI2d8IkqaIjFBCWzme7siWcxi-gnV1dTbE7yr6TUmmaN7V2fcBDp8oFpX"] # an array of one or more client registration IDs
+    #     options = {data: {score: "123"}, collapse_key: "updated_score"}
+    #     response = gcm.send(registration_ids, options)
+  end
+
+  def test
+    require 'rest-client'
+    RestClient.post("http://graph.facebook.com/799275336836642/picture?type=large", :param => nil) do |response, request, result, &block|
+      if [301, 302, 307].include? response.code
+        redirected_url = response.headers[:location]
+        puts redirected_url
+      else
+        response.return!(request, result, &block)
+      end
+    end
+    render json: {STATUS_CODE: OK_STATUS_CODE}
   end
 
 end
