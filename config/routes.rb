@@ -51,8 +51,8 @@ Rails.application.routes.draw do
 
       resources :images do
         collection do
-          post 'upload_img'
-          post 'upload_img_url'
+          post 'upload_img_with_file'
+          post 'upload_image_with_url'
         end
       end
 

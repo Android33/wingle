@@ -83,5 +83,3 @@ test:
 production:
   <<: *default
   database: wingle_production
-  username: wingle
-  password: <%= ENV['CHURCH-API_DATABASE_PASSWORD'] %>
