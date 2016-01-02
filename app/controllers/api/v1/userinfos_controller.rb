@@ -18,6 +18,10 @@ class Api::V1::UserinfosController < ApplicationController
       user.name = params[:name]
       user.save
     end
+    if params[:image_id]
+      user.image_id = params[:image_id]
+      user.save
+    end
     if user.userinfo
       user_info = user.userinfo
     else

@@ -31,7 +31,7 @@ class Api::V1::ChatsController < ApplicationController
     chats = user.chats.where("sender_id = ? OR receiver_id = ?", receiver.id, receiver.id)
 
     render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: receiver.name,
-                  chat_user_email: receiver.email, is_online: is_online, chat_user_id: receiver.id, chat: chats}
+                  chat_user_email: receiver.email, is_online: is_online, chat_user_id: receiver.id, chat_user_image_id: receiver.image_id, chat: chats}
   end
 
   def by_user_all
@@ -58,6 +58,7 @@ class Api::V1::ChatsController < ApplicationController
       chat_object["chat_user_name"] = chat_user.name
       chat_object["chat_user_email"] = chat_user.email
       chat_object["chat_user_id"] = chat_user.id
+      chat_object["chat_user_image_id"] = chat_user.image_id
       chat_object["chats"] = chats
 #      chats_array["chat_user_email"] = chat_user.email
       chats_array << chat_object
@@ -95,6 +96,7 @@ class Api::V1::ChatsController < ApplicationController
       chat_object["chat_user_name"] = chat_user.name
       chat_object["chat_user_email"] = chat_user.email
       chat_object["chat_user_id"] = chat_user.id
+      chat_object["chat_user_image_id"] = chat_user.image_id
       chat_object["last_msg"] = chats
 #      chats_array["chat_user_email"] = chat_user.email
       chats_array << chat_object
@@ -122,6 +124,7 @@ class Api::V1::ChatsController < ApplicationController
 
 
     render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: chat_user.name,
-                  chat_user_email: chat_user.email, is_online: is_online, chat_user_id: chat_user.id, chat: chats}
+                  chat_user_email: chat_user.email, is_online: is_online, chat_user_id: chat_user.id,
+                  chat_user_image_id: chat_user.image_id, chat: chats}
   end
 end

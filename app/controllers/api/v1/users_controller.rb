@@ -42,6 +42,7 @@ class Api::V1::UsersController < ApplicationController
       user_object["id"] = near_user.id
       user_object["name"] = near_user.name
       user_object["surname"] = near_user.surname
+      user_object["image_id"] = near_user.image_id
 
       if user.favourites.where(:fav_user_id => near_user.id).count > 0
         user_object["is_favourite"] = true
@@ -83,6 +84,7 @@ class Api::V1::UsersController < ApplicationController
       user_object["id"] = near_user.id
       user_object["name"] = near_user.name
       user_object["surname"] = near_user.surname
+      user_object["image_id"] = near_user.image_id
 
       if user.favourites.where(:fav_user_id => near_user.id).count > 0
         user_object["is_favourite"] = true
@@ -137,6 +139,7 @@ class Api::V1::UsersController < ApplicationController
       puts "name: #{near_user.name}"
       user_object["id"] = near_user.id
       user_object["name"] = near_user.name
+      user_object["image_id"] = near_user.image_id
       user_info = users.find(near_user.id).userinfo
       if !user_info
         next
@@ -180,6 +183,7 @@ class Api::V1::UsersController < ApplicationController
       else
         user_object["is_favourite"] = false
       end
+
       users_array << user_object
     end
 
@@ -201,13 +205,13 @@ class Api::V1::UsersController < ApplicationController
         if user.userinfo
           info = user.userinfo
           render json: {STATUS_MSG: USER_INFO_FOUND, STATUS_CODE: OK_STATUS_CODE, user_token: user.authentication_token,
-                        user_email: email, name: user.name, gender: info.gender, height: info.height,
+                        user_email: email, name: user.name,image_id: user.image_id, gender: info.gender, height: info.height,
                         ethnicity: info.ethnicity, body_type: info.body_type, relation_status: info.relation_status,
                         interested_in: info.interested_in, about_me: info.about_me, wingle_id: info.wingle_id, city: info.city,
                         country: info.country, zipcode: info.zipcode, address: info.address, birthday: info.birthday}
         else
           render json: {STATUS_MSG: NO_USER_INFO, STATUS_CODE: OK_STATUS_CODE, user_token: user.authentication_token, user_email: email,
-                        name: user.name, gender: nil, height: nil,
+                        name: user.name,image_id: user.image_id, gender: nil, height: nil,
                         ethnicity: nil, body_type: nil, relation_status: nil,
                         interested_in: nil, about_me: nil, wingle_id: nil, city: nil,
                         country: nil, zipcode: nil, address: nil, birthday: nil}
@@ -241,11 +245,11 @@ class Api::V1::UsersController < ApplicationController
     update_latlong(user, params[:latitude], params[:longitude])
     searched_user_ids = Userinfo.where(:wingle_id => params[:wingle_id]).pluck(:user_id)
     if searched_user_ids.empty?
-      render json: {STATUS_CODE: NOT_FOUND_STATUS_CODE, user_id: nil, user_email: nil, user_name: nil, wingle_id: nil}
+      render json: {STATUS_CODE: NOT_FOUND_STATUS_CODE, user_id: nil, user_email: nil, user_name: nil, wingle_id: nil, image_id: nil}
     else
       searched_user = User.find(searched_user_ids[0])
       render json: {STATUS_CODE: OK_STATUS_CODE, user_id: searched_user.id,
-                    user_email: searched_user.email, user_name: searched_user.name, wingle_id: params[:wingle_id]}
+                    user_email: searched_user.email, user_name: searched_user.name, wingle_id: params[:wingle_id],image_id: searched_user.image_id}
     end
 
   end
@@ -259,9 +263,9 @@ class Api::V1::UsersController < ApplicationController
     searched_user = User.find_by_email(params[:email_id])
     if searched_user
       render json: {STATUS_CODE: OK_STATUS_CODE, user_id: searched_user.id,
-                    user_email: searched_user.email, user_name: searched_user.name}
+                    user_email: searched_user.email, user_name: searched_user.name, image_id: searched_user.image_id}
     else
-      render json: {STATUS_CODE: NOT_FOUND_STATUS_CODE, user_id: nil, user_email: nil, user_name: nil}
+      render json: {STATUS_CODE: NOT_FOUND_STATUS_CODE, user_id: nil, user_email: nil, user_name: nil, image_id: nil}
     end
   end
 
