@@ -97,8 +97,11 @@ class Api::V1::ImagesController < ApplicationController
       # https://graph.facebook.com/799275336836642/picture?type=large
       image.user_id = user.id
 
+
       image.user_img_count = user.images.count
       image.save!
+      user.image_id = image.id
+      user.save
     rescue Exception => e
       puts "=========Exception starts==========="
       puts e.message.inspect
