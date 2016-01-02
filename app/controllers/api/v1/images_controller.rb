@@ -101,7 +101,7 @@ class Api::V1::ImagesController < ApplicationController
       return render json: {STATUS_CODE: C::INTERNAL_SERVER_ERROR_STATUS_CODE, EXCEPTION_MSG: e.message.inspect}
     end
     # https://s3-us-west-2.amazonaws.com/wingleuserprofiles/uploads/bubble_1.png
-    return render json: {STATUS_CODE: C::OK_STATUS_CODE, image: image, user_info: user_info}
+    return render json: {STATUS_CODE: C::OK_STATUS_CODE, image: image, user_info: user_info, user: user}
   end
 
 end
