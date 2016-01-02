@@ -9,7 +9,7 @@ class Api::V1::ImagesController < ApplicationController
     image.user_img_count = params[:user_image_count].to_i + 1
     image.save!
 
-    return render :json => {STATUS_CODE: 200, image: image}
+    return render :json => {STATUS_CODE: OK_STATUS_CODE, image: image}
   end
 
   def upload_image_with_url
@@ -76,7 +76,7 @@ class Api::V1::ImagesController < ApplicationController
         user_info.zipcode = params[:zipcode]
       end
 
-      if params[:wingle_id]
+      if params[:wingle_id] && params[:wingle_id] != ""
         wingle_ids = Userinfo.pluck(:wingle_id)
         wingle_ids && wingle_ids.each do |wingle_id|
           if wingle_id == params[:wingle_id]
