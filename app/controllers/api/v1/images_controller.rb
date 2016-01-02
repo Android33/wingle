@@ -27,6 +27,11 @@ class Api::V1::ImagesController < ApplicationController
       end
       update_latlong(user, params[:latitude], params[:longitude])
 
+      if (name.present?)
+        user.name = params[:name]
+        user.save
+      end
+
       if user.userinfo
         user_info = user.userinfo
       else
