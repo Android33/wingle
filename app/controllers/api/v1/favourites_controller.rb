@@ -53,7 +53,7 @@ class Api::V1::FavouritesController < ApplicationController
       user_object["id"] =  fav_user.id
       user_object["name"] =  fav_user.name
       user_object["surname"] =  fav_user.surname
-      user_object["user_image_id"] =  fav_user.image_id
+      user_object["user_image_no"] =  fav_user.image_no
       user_object["poke_count"] =  "plz implement"
 
       users_array << user_object

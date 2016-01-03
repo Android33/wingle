@@ -42,7 +42,7 @@ class Api::V1::UsersController < ApplicationController
       user_object["id"] = near_user.id
       user_object["name"] = near_user.name
       user_object["surname"] = near_user.surname
-      user_object["image_id"] = near_user.image_id
+      user_object["image_no"] = near_user.image_no
 
       if user.favourites.where(:fav_user_id => near_user.id).count > 0
         user_object["is_favourite"] = true
@@ -139,7 +139,7 @@ class Api::V1::UsersController < ApplicationController
       puts "name: #{near_user.name}"
       user_object["id"] = near_user.id
       user_object["name"] = near_user.name
-      user_object["image_id"] = near_user.image_id
+      user_object["image_no"] = near_user.image_no
       user_info = users.find(near_user.id).userinfo
       if !user_info
         next
