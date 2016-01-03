@@ -230,7 +230,7 @@ class Api::V1::UsersController < ApplicationController
       token = newUser.authentication_token;
       if newUser.save
         update_latlong(newUser, params[:latitude], params[:longitude])
-        render json: {STATUS_CODE: OK_STATUS_CODE, user_token: newUser.authentication_token, user_email: newUser.email, STATUS_MSG: NO_USER_INFO}
+        render json: {STATUS_CODE: OK_STATUS_CODE, user_token: newUser.authentication_token, user_email: newUser.email, STATUS_MSG: NO_USER_INFO, id: newUser.id}
       else
         render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE, user_token: nil, user_email: nil}
       end

@@ -19,7 +19,9 @@ class Api::V1::UserinfosController < ApplicationController
       user.save
     end
     if params[:image_id]
-      user.image_id = params[:image_id]
+      image = Image.find(params[:image_id])
+      user.image_id = image.id
+      user.image_no = image.user_img_count
       user.save
     end
     if user.userinfo

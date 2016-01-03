@@ -101,6 +101,7 @@ class Api::V1::ImagesController < ApplicationController
       image.user_img_count = user.images.count
       image.save!
       user.image_id = image.id
+      user.image_no = image.user_img_count
       user.save
     rescue Exception => e
       puts "=========Exception starts==========="
