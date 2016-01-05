@@ -205,16 +205,16 @@ class Api::V1::UsersController < ApplicationController
         if user.userinfo
           info = user.userinfo
           render json: {STATUS_MSG: USER_INFO_FOUND, STATUS_CODE: OK_STATUS_CODE, user_token: user.authentication_token,
-                        user_email: email, name: user.name,image_id: user.image_id,image_no: user.image_no, gender: info.gender, height: info.height,
+                        user_email: email, name: user.name, image_id: user.image_id, image_no: user.image_no, gender: info.gender, height: info.height,
                         ethnicity: info.ethnicity, body_type: info.body_type, relation_status: info.relation_status,
                         interested_in: info.interested_in, about_me: info.about_me, wingle_id: info.wingle_id, city: info.city,
                         country: info.country, zipcode: info.zipcode, address: info.address, birthday: info.birthday, id: user.id}
         else
           render json: {STATUS_MSG: NO_USER_INFO, STATUS_CODE: OK_STATUS_CODE, user_token: user.authentication_token, user_email: email,
-                        name: user.name,image_id: user.image_id,image_no: user.image_no, gender: nil, height: nil,
+                        name: user.name, image_id: user.image_id, image_no: user.image_no, gender: nil, height: nil,
                         ethnicity: nil, body_type: nil, relation_status: nil,
                         interested_in: nil, about_me: nil, wingle_id: nil, city: nil,
-                        country: nil, zipcode: nil, address: nil, birthday: nil, id:user.id}
+                        country: nil, zipcode: nil, address: nil, birthday: nil, id: user.id}
         end
       else
         render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE, user_token: nil, user_email: nil}
@@ -237,6 +237,10 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
+  def full_profile
+    Geocoder::Calculations.distance_between([47.858205, 2.294359], [40.748433, -73.985655])
+  end
+
   def search_with_wingle_id
     user = User.find_by_email(params[:user_email])
     if params[:user_token] != user.authentication_token
@@ -249,7 +253,7 @@ class Api::V1::UsersController < ApplicationController
     else
       searched_user = User.find(searched_user_ids[0])
       render json: {STATUS_CODE: OK_STATUS_CODE, user_id: searched_user.id,
-                    user_email: searched_user.email, user_name: searched_user.name, wingle_id: params[:wingle_id],image_id: searched_user.image_id}
+                    user_email: searched_user.email, user_name: searched_user.name, wingle_id: params[:wingle_id], image_id: searched_user.image_id}
     end
 
   end
@@ -291,53 +295,43 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def test_gcm
-    send_gcm_message("title", "body", "cGLdhej3-Rk:APA91bEbLW0tDg8_e_rwniFThdyBf2446liMUJKlD1hUM7Ram38shCYhFIG14JCimTpO0D3PBC75PcuPl64MI2d8IkqaIjFBCWzme7siWcxi-gnV1dTbE7yr6TUmmaN7V2fcBDp8oFpX")
+    data = {
+        :title => "New Msg",
+        :body => "Chat Msg ",
+        :sender_id => "sender_id",
+        :receiver_id => "receiver_id"
+    }
+    send_gcm_message(data, ["dG1IqJV668M:APA91bHW9Fr17CMHKzzPVOvEx6-hrXUcgrRvC7qjxzvZiv5cW4XaWNwbCg8yAgN8c1MrQRBzDgx7gD87-9jJbGdNyjeJZC4wnjBKarvsTjxvJzwjydxAyhfCofXGM11JyDQaKhgKocC9","c-Vm5OpwHf4:APA91bEFf_B_nAYGV9fIuVY_A6IcswJ7AzKTvq5QkLP_jgeGzaR0xqhFU0AUYN_FY6UBk2pgEZD1a4nemR78Rp0g219SNOpEiWdSHCGN3WZPSyBmKWCVgK4uzhYMJCMLtVD0yMFHW9yw"])
 
   end
 
 
-  def send_gcm_message(title, body, reg_tokens)
+  def send_gcm_message(data, reg_tokens)
     require 'rest-client'
-    # Construct JSON payload
+
+    # data = {
+    #     :title => "title2",
+    #     :body => "body",
+    #     :anything => "foobar"
+    # }
+
     post_args = {
         # :to field can also be used if there is only 1 reg token to send
         :registration_ids => reg_tokens,
-        :data => {
-            :title => title,
-            :body => body,
-            :anything => "foobar"
-        }
+        :data => data
     }
 
-    # Send the request with JSON args and headers
-    RestClient.post 'http://gcm-http.googleapis.com/gcm/send', post_args.to_json,
-                    :Authorization => 'key=' + C::AUTHORIZE_KEY, :content_type => :json, :accept => :json
-    render json: {STATUS_CODE: OK_STATUS_CODE, STATUS_MSG: C::SUCCESS_STATUS_MSG}
-
-    #  require 'gcm'
-    #
-    #     gcm = GCM.new(C::AUTHORIZE_KEY)
-    # # you can set option parameters in here
-    # #  - all options are pass to HTTParty method arguments
-    # #  - ref: https://github.com/jnunemaker/httparty/blob/master/lib/httparty.rb#L40-L68
-    # #  gcm = GCM.new("my_api_key", timeout: 3)
-    #
-    #     registration_ids= [ "cGLdhej3-Rk:APA91bEbLW0tDg8_e_rwniFThdyBf2446liMUJKlD1hUM7Ram38shCYhFIG14JCimTpO0D3PBC75PcuPl64MI2d8IkqaIjFBCWzme7siWcxi-gnV1dTbE7yr6TUmmaN7V2fcBDp8oFpX"] # an array of one or more client registration IDs
-    #     options = {data: {score: "123"}, collapse_key: "updated_score"}
-    #     response = gcm.send(registration_ids, options)
-  end
-
-  def test
-    require 'rest-client'
-    RestClient.post("http://graph.facebook.com/799275336836642/picture?type=large", :param => nil) do |response, request, result, &block|
-      if [301, 302, 307].include? response.code
-        redirected_url = response.headers[:location]
-        puts redirected_url
-      else
-        response.return!(request, result, &block)
-      end
+    begin
+      # Send the request with JSON args and headers
+      response = RestClient.post 'http://gcm-http.googleapis.com/gcm/send', post_args.to_json,
+                      :Authorization => 'key=' + C::AUTHORIZE_KEY, :content_type => :json, :accept => :json
+      return render json: {STATUS_CODE: OK_STATUS_CODE, STATUS_MSG: C::SUCCESS_STATUS_MSG, response: response}
+    rescue Exception => e
+      puts "=========Exception starts==========="
+      puts e.message.inspect
+      puts "---json Exception ends-----"
+      return render json: {STATUS_CODE: C::INTERNAL_SERVER_ERROR_STATUS_CODE, EXCEPTION_MSG: e.message.inspect}
     end
-    render json: {STATUS_CODE: OK_STATUS_CODE}
   end
 
 end

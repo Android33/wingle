@@ -7,8 +7,6 @@ gem 'rails', '4.1.2'
 gem 'pg'
 # for sending requests to other servers
 gem 'rest-client'
-# for handling gcm
-gem 'gcm'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 4.0.3'
 # for image uploading

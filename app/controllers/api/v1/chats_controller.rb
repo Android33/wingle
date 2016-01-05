@@ -3,6 +3,7 @@ class Api::V1::ChatsController < ApplicationController
   include UsersHelper
 
   def create
+    require 'rest-client'
     user = User.find_by_email(params[:user_email])
     if params[:user_token] != user.authentication_token
       return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
@@ -28,10 +29,34 @@ class Api::V1::ChatsController < ApplicationController
       is_online = false
     end
 
-    chats = user.chats.where("sender_id = ? OR receiver_id = ?", receiver.id, receiver.id)
+    receiver.gcm_token = "c-Vm5OpwHf4:APA91bEFf_B_nAYGV9fIuVY_A6IcswJ7AzKTvq5QkLP_jgeGzaR0xqhFU0AUYN_FY6UBk2pgEZD1a4nemR78Rp0g219SNOpEiWdSHCGN3WZPSyBmKWCVgK4uzhYMJCMLtVD0yMFHW9yw"
+    if receiver.gcm_token
+      data = {
+          :chat_user => user.name,
+          :chat_msg => chat_msg,
+          :sender_id => chat.sender_id,
+          :receiver_id => chat.receiver_id
+      }
+      reg_tokens = [receiver.gcm_token]
+      post_args = {
+          # :to field can also be used if there is only 1 reg token to send
+          :registration_ids => reg_tokens,
+          :data => data
+      }
 
-    render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: receiver.name,
-                  chat_user_email: receiver.email, is_online: is_online, chat_user_id: receiver.id, chat_user_image_no: receiver.image_no, chat: chats}
+      begin
+        response = RestClient.post 'http://gcm-http.googleapis.com/gcm/send', post_args.to_json,
+                                   :Authorization => 'key=' + C::AUTHORIZE_KEY, :content_type => :json, :accept => :json
+        chats = user.chats.where("sender_id = ? OR receiver_id = ?", receiver.id, receiver.id)
+        render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: receiver.name,
+                      chat_user_email: receiver.email, is_online: is_online, chat_user_id: receiver.id, chat_user_image_no: receiver.image_no, chat: chats}
+      rescue Exception => e
+        puts "=========Exception starts==========="
+        puts e.message.inspect
+        puts "---json Exception ends-----"
+        return render json: {STATUS_CODE: C::INTERNAL_SERVER_ERROR_STATUS_CODE, EXCEPTION_MSG: e.message.inspect}
+      end
+    end
   end
 
   def by_user_all
