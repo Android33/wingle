@@ -222,7 +222,12 @@ class Api::V1::UsersController < ApplicationController
     else
       login_type = params[:login_type]
       puts "inside new"
-      name = params[:name]
+      if params[:name].present?
+        name = params[:name]
+      else
+        name = ""
+      end
+
       newUser = User.new;
       newUser.email = email;
       newUser.name = name;
