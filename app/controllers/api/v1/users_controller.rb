@@ -310,6 +310,16 @@ class Api::V1::UsersController < ApplicationController
 
   end
 
+  def get_user
+    user = User.find(params[:user_id])
+    user.authentication_token = nil
+    user.gcm_token = nil
+    if user.userinfo
+      return render json: {user: user, user_info: user.userinfo}
+    else
+      return render json: {user: user}
+    end
+  end
 
   def send_gcm_message(data, reg_tokens)
     require 'rest-client'

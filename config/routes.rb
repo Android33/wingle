@@ -38,6 +38,7 @@ Rails.application.routes.draw do
           post 'set_gcm_token'
           post 'test_gcm'
           post 'test'
+          post 'get_user'
         end
       end
 
