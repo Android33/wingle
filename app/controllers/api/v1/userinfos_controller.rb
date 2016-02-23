@@ -5,7 +5,7 @@ class Api::V1::UserinfosController < ApplicationController
   include UsersHelper
 
   def create
-
+    require 'RMagick'
     user = User.find_by_email(params[:user_email])
     if params[:user_token] != user.authentication_token
       return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
@@ -24,6 +24,20 @@ class Api::V1::UserinfosController < ApplicationController
       user.image_no = image.user_img_count
       user.save
     end
+
+    if params[:image_text]
+      data = params[:image_text]# code like this  data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABPUAAAI9CAYAAABSTE0XAAAgAElEQVR4Xuy9SXPjytKm6ZwnUbNyHs7Jc7/VV9bW1WXWi9q
+      image_data = Base64.decode64(data['data:image/png;base64,'.length .. -1])
+      new_file=File.new("1.png", 'wb')
+      new_file.write(image_data)
+
+      image = Image.new
+      image.img = new_file # Assign a file like this, or
+      image.user_id = user.id
+      image.user_img_count = user.images.count + 1
+      image.save!
+    end
+
     if user.userinfo
       user_info = user.userinfo
     else

@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.1.2'
+gem 'rmagick', '~> 2.15', '>= 2.15.2'
 # Use postgresql as the database for Active Record
 gem 'pg'
 # for sending requests to other servers
@@ -52,4 +53,3 @@ gem 'spring',        group: :development
 
 # Use debugger
 # gem 'debugger', group: [:development, :test]
-
