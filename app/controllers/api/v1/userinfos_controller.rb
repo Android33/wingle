@@ -5,7 +5,6 @@ class Api::V1::UserinfosController < ApplicationController
   include UsersHelper
 
   def create
-    require 'RMagick'
     user = User.find_by_email(params[:user_email])
     if params[:user_token] != user.authentication_token
       return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
@@ -14,7 +13,6 @@ class Api::V1::UserinfosController < ApplicationController
 
     name = params[:name]
     if (name.present?)
-      puts "name #{name}"
       user.name = params[:name]
       user.save
     end
@@ -26,16 +24,14 @@ class Api::V1::UserinfosController < ApplicationController
     end
 
     if params[:image_text]
-      data = params[:image_text]# code like this  data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABPUAAAI9CAYAAABSTE0XAAAgAElEQVR4Xuy9SXPjytKm6ZwnUbNyHs7Jc7/VV9bW1WXWi9q
-      image_data = Base64.decode64(data['data:image/png;base64,'.length .. -1])
-      new_file=File.new("1.png", 'wb')
-      new_file.write(image_data)
 
       image = Image.new
-      image.img = new_file # Assign a file like this, or
+      image.img = parse_image_data(params[:img])
       image.user_id = user.id
       image.user_img_count = user.images.count + 1
       image.save!
+      ensure
+        clean_tempfile
     end
 
     if user.userinfo
@@ -61,4 +57,48 @@ class Api::V1::UserinfosController < ApplicationController
     user_info.save
     render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info}
   end
+
+  # def create
+  #   image = Image.new
+  #   image.img = parse_image_data(params[:img])
+  #   image.user_id = 3
+  #   image.user_img_count = 1
+  #   # image.img = params[:image] # Assign a file like this, or
+  #   # @upload = Upload.new(upload_params)
+  #   image.save!
+  # ensure
+  #   clean_tempfile
+  # end
+
+  def parse_image_data(base64_image)
+    filename = "upload-image"
+    in_content_type, encoding, string = base64_image.split(/[:;,]/)[1..3]
+
+    @tempfile = Tempfile.new(filename)
+    @tempfile.binmode
+    @tempfile.write Base64.decode64(string)
+    @tempfile.rewind
+
+    # for security we want the actual content type, not just what was passed in
+    content_type = `file --mime -b #{@tempfile.path}`.split(";")[0]
+
+    # we will also add the extension ourselves based on the above
+    # if it's not gif/jpeg/png, it will fail the validation in the upload model
+    extension = content_type.match(/gif|jpeg|png/).to_s
+    filename += ".#{extension}" if extension
+
+    ActionDispatch::Http::UploadedFile.new({
+      tempfile: @tempfile,
+      content_type: content_type,
+      filename: filename
+    })
+  end
+
+  def clean_tempfile
+    if @tempfile
+      @tempfile.close
+      @tempfile.unlink
+    end
+  end
+
 end
