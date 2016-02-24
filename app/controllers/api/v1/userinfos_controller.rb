@@ -24,13 +24,15 @@ class Api::V1::UserinfosController < ApplicationController
     end
 
     if params[:image_text]
-
       image = Image.new
       image.img = parse_image_data(params[:image_text])
       image.user_id = user.id
       image.user_img_count = user.images.count + 1
       image.save!
-      clean_tempfile
+      ensure
+        clean_tempfile
+    else
+      
     end
 
     if user.userinfo
