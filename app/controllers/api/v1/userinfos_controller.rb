@@ -30,8 +30,7 @@ class Api::V1::UserinfosController < ApplicationController
       image.user_id = user.id
       image.user_img_count = user.images.count + 1
       image.save!
-      ensure
-        clean_tempfile
+      clean_tempfile
     end
 
     if user.userinfo
