@@ -76,15 +76,15 @@ class Api::V1::ImagesController < ApplicationController
         user_info.zipcode = params[:zipcode]
       end
 
-      if params[:wingle_id] && params[:wingle_id] != ""
-        wingle_ids = Userinfo.pluck(:wingle_id)
-        wingle_ids && wingle_ids.each do |wingle_id|
-          if wingle_id == params[:wingle_id]
-            return render json: {STATUS_CODE: C::CONFLICT_STATUS_CODE, STATUS_MSG: C::WINGLE_ID_NOT_AVAILABLE}
-          end
-        end
-        user_info.wingle_id = params[:wingle_id]
-      end
+      # if params[:wingle_id] && params[:wingle_id] != ""
+      #   wingle_ids = Userinfo.pluck(:wingle_id)
+      #   wingle_ids && wingle_ids.each do |wingle_id|
+      #     if wingle_id == params[:wingle_id]
+      #       return render json: {STATUS_CODE: C::CONFLICT_STATUS_CODE, STATUS_MSG: C::WINGLE_ID_NOT_AVAILABLE}
+      #     end
+      #   end
+      #   user_info.wingle_id = params[:wingle_id]
+      # end
       user_info.save
 
 
