@@ -21,7 +21,8 @@ module C
   OK_STATUS_CODE = "200";
   SUCCESS_STATUS_MSG = "SUCCESS";
   FAILURE_STATUS_MSG = "FAILURE";
-  AUTHORIZE_KEY = "AIzaSyBMZ11Ecc6BupqlVE7Cpxxw7XAgJUs7Q24";
+  AUTHORIZE_KEY = "AIzaSyDwgOFW8c2ABmPK7v--dWEgGSXZIz916fo";
+  # AIzaSyBMZ11Ecc6BupqlVE7Cpxxw7XAgJUs7Q24
   # /**
   #  * The request has been fulfilled and resulted in a new resource being created
   #  */

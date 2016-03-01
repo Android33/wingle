@@ -2,6 +2,7 @@
 #class Api::V1::UsersController < Api::V1::BaseController
 class Api::V1::UsersController < ApplicationController
   # before_action :authenticate_user!
+  respond_to :json
 
   include UsersHelper
   # include c
@@ -290,7 +291,7 @@ class Api::V1::UsersController < ApplicationController
 
   def set_gcm_token
     user = User.find_by_email(params[:user_email])
-    if params[:user_token] != user.authentication_token
+    if !user || params[:user_token] != user.authentication_token
       return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
     end
     update_latlong(user, params[:latitude], params[:longitude])
