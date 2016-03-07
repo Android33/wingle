@@ -91,6 +91,25 @@ class Api::V1::UserinfosController < ApplicationController
     render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info}
   end
 
+  def update_wingle_id
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
+    wingle_ids = Userinfo.pluck(:wingle_id)
+    wingle_ids && wingle_ids.each do |wingle_id|
+      if wingle_id == params[:wingle_id]
+        return render json: {STATUS_CODE: C::CONFLICT_STATUS_CODE, STATUS_MSG: C::WINGLE_ID_NOT_AVAILABLE}
+      end
+    end
+    user_info.wingle_id = params[:wingle_id]
+
+    user_info.save
+    render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info}
+  end
+
   # def create
   #   image = Image.new
   #   image.img = parse_image_data(params[:img])

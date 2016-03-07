@@ -60,6 +60,7 @@ Rails.application.routes.draw do
       resources :userinfos do
         collection do
           post 'create'
+          post 'update_wingle_id'
         end
       end
 
