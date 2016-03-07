@@ -43,18 +43,49 @@ class Api::V1::UserinfosController < ApplicationController
       user_info.user_id = user.id
     end
 
-    user_info.gender = params[:gender]
-    user_info.birthday = params[:birthday]
-    user_info.height = params[:height]
-    user_info.ethnicity = params[:ethnicity]
-    user_info.body_type = params[:body_type]
-    user_info.relation_status = params[:relation_status]
-    user_info.interested_in = params[:interested_in]
-    user_info.about_me = params[:about_me]
+    if params[:gender]
+      user_info.gender = params[:gender]
+    end
 
-    user_info.city = params[:city]
-    user_info.country = params[:country]
-    user_info.zipcode = params[:zipcode]
+    if params[:birthday]
+      user_info.birthday = params[:birthday]
+    end
+
+    if params[:height]
+      user_info.height = params[:height]
+    end
+
+    if params[:ethnicity]
+      user_info.ethnicity = params[:ethnicity]
+    end
+
+    if params[:body_type]
+      user_info.body_type = params[:body_type]
+    end
+
+    if params[:relation_status]
+      user_info.relation_status = params[:relation_status]
+    end
+
+    if params[:interested_in]
+      user_info.interested_in = params[:interested_in]
+    end
+
+    if params[:about_me]
+      user_info.about_me = params[:about_me]
+    end
+
+    if params[:city]
+      user_info.city = params[:city]
+    end
+
+    if params[:country]
+      user_info.country = params[:country]
+    end
+
+    if params[:zipcode]
+      user_info.zipcode = params[:zipcode]
+    end
 
     user_info.save
     render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info}
