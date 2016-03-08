@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160103000207) do
+ActiveRecord::Schema.define(version: 20160308204507) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -62,6 +62,14 @@ ActiveRecord::Schema.define(version: 20160103000207) do
 
   add_index "images", ["user_id"], name: "index_images_on_user_id", using: :btree
 
+  create_table "notifications", force: true do |t|
+    t.string   "notification_type"
+    t.integer  "sender_id"
+    t.integer  "receiver_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "nsettings", force: true do |t|
     t.integer  "user_id"
     t.boolean  "favorite_me",  default: true
@@ -87,7 +95,7 @@ ActiveRecord::Schema.define(version: 20160103000207) do
   create_table "userinfos", force: true do |t|
     t.integer  "user_id"
     t.string   "gender",          default: ""
-    t.decimal  "height"
+    t.string   "height"
     t.string   "ethnicity"
     t.string   "body_type"
     t.string   "relation_status"
@@ -98,7 +106,7 @@ ActiveRecord::Schema.define(version: 20160103000207) do
     t.datetime "updated_at"
     t.string   "city"
     t.string   "country"
-    t.string   "zipcode"
+    t.string   "headline"
     t.string   "address"
     t.datetime "birthday"
   end

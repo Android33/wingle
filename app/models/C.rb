@@ -11,6 +11,10 @@ module C
     STATUSES = [["N/A", 0], ["Correct", 1], ["Worng", 2]]
   end
 
+  class Notifications
+    TYPE = {favorite: "favorite", checkout: "checkout", like: "like", chat: "chat"}
+  end
+
   USER_INFO_FOUND = "USER_INFO_FOUND";
   NO_USER_INFO = "NO_USER_INFO";
   WINGLE_ID_NOT_AVAILABLE = "WINGLE_ID_NOT_AVAILABLE";

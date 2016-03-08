@@ -6,6 +6,7 @@ class User < ActiveRecord::Base
   has_many :pokes
   has_many :images
   has_many :favourites
+  has_many :notifications, foreign_key: 'receiver_id'
   has_and_belongs_to_many :chats
 
   acts_as_token_authenticatable

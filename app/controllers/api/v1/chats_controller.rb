@@ -32,6 +32,7 @@ class Api::V1::ChatsController < ApplicationController
     # receiver.gcm_token = "c-Vm5OpwHf4:APA91bEFf_B_nAYGV9fIuVY_A6IcswJ7AzKTvq5QkLP_jgeGzaR0xqhFU0AUYN_FY6UBk2pgEZD1a4nemR78Rp0g219SNOpEiWdSHCGN3WZPSyBmKWCVgK4uzhYMJCMLtVD0yMFHW9yw"
     if receiver.gcm_token
       data = {
+          :gcm_type => C::Notifications::TYPE[:chat],
           :chat_user => user.name,
           :chat_msg => chat_msg,
           :sender_id => chat.sender_id,

@@ -11,11 +11,48 @@ class Api::V1::FavouritesController < ApplicationController
     end
     update_latlong(user, params[:latitude], params[:longitude])
 
+
+    faved_user = User.find(params[:fav_user_id])
     fav = user.favourites.new
-    fav.fav_user_id = params[:fav_user_id]
+    fav.fav_user_id = faved_user.id
     fav.save
 
-    return render :json=> {STATUS_CODE: OK_STATUS_CODE, fav_user: fav}
+    notification = Notification.new
+    # receiver.notifications.new
+    # you can call user.notifications.all for receiver notifications
+    notification.receiver_id = faved_user.id
+    notification.sender_id = user.id
+    notification.notification_type = C::Notifications::TYPE[:favorite]
+    notification.save
+
+    if faved_user.gcm_token
+      data = {
+          :gcm_type => C::Notifications::TYPE[:favorite],
+          :user_name => user.name,
+          :notification_type => C::Notifications::TYPE[:favorite],
+          :user_id => user.id,
+          :receiver_id => faved_user.id
+      }
+      reg_tokens = [faved_user.gcm_token]
+      post_args = {
+          # :to field can also be used if there is only 1 reg token to send
+          :registration_ids => reg_tokens,
+          :data => data
+      }
+
+      begin
+        response = RestClient.post 'http://gcm-http.googleapis.com/gcm/send', post_args.to_json,
+                                   :Authorization => 'key=' + C::AUTHORIZE_KEY, :content_type => :json, :accept => :json
+        render :json=> {STATUS_CODE: OK_STATUS_CODE, fav_user: fav}
+      rescue Exception => e
+        puts "=========Exception starts==========="
+        puts e.message.inspect
+        puts "---json Exception ends-----"
+        return render json: {STATUS_CODE: C::INTERNAL_SERVER_ERROR_STATUS_CODE, EXCEPTION_MSG: e.message.inspect}
+      end
+    else
+      return render json: {STATUS_CODE: C::INTERNAL_SERVER_ERROR_STATUS_CODE, EXCEPTION_MSG: "No GCM Token User have to resfresh the chat detail page"}
+    end
   end
 
   def destroy
