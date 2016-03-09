@@ -50,15 +50,17 @@ class Api::V1::ChatsController < ApplicationController
                                    :Authorization => 'key=' + C::AUTHORIZE_KEY, :content_type => :json, :accept => :json
         chats = user.chats.where("sender_id = ? OR receiver_id = ?", receiver.id, receiver.id)
         render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: receiver.name,
-                      chat_user_email: receiver.email, is_online: is_online, chat_user_id: receiver.id, chat_user_image_no: receiver.image_no, chat: chats}
+                      chat_user_email: receiver.email, is_online: is_online, chat_user_id: receiver.id, chat_user_image_no: receiver.image_no, chat: chats, MSG: C::SUCCESS_STATUS_MSG}
       rescue Exception => e
         puts "=========Exception starts==========="
         puts e.message.inspect
         puts "---json Exception ends-----"
-        return render json: {STATUS_CODE: C::INTERNAL_SERVER_ERROR_STATUS_CODE, EXCEPTION_MSG: e.message.inspect}
+        return render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: receiver.name,
+                      chat_user_email: receiver.email, is_online: is_online, chat_user_id: receiver.id, chat_user_image_no: receiver.image_no, chat: chats, MSG: e.message.inspect}
       end
     else
-      return render json: {STATUS_CODE: C::INTERNAL_SERVER_ERROR_STATUS_CODE, EXCEPTION_MSG: "No GCM Token User have to resfresh the chat detail page"}
+      return render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: receiver.name,
+                    chat_user_email: receiver.email, is_online: is_online, chat_user_id: receiver.id, chat_user_image_no: receiver.image_no, chat: chats, MSG: C::NO_GCM_FOUND}
     end
   end
 

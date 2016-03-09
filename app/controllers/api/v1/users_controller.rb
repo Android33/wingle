@@ -209,13 +209,13 @@ class Api::V1::UsersController < ApplicationController
                         user_email: email, name: user.name, image_id: user.image_id, image_no: user.image_no, gender: info.gender, height: info.height,
                         ethnicity: info.ethnicity, body_type: info.body_type, relation_status: info.relation_status,
                         interested_in: info.interested_in, about_me: info.about_me, wingle_id: info.wingle_id, city: info.city,
-                        country: info.country, zipcode: info.zipcode, address: info.address, birthday: info.birthday, id: user.id}
+                        country: info.country, headline: info.headline, address: info.address, birthday: info.birthday, id: user.id}
         else
           render json: {STATUS_MSG: NO_USER_INFO, STATUS_CODE: OK_STATUS_CODE, user_token: user.authentication_token, user_email: email,
                         name: user.name, image_id: user.image_id, image_no: user.image_no, gender: nil, height: nil,
                         ethnicity: nil, body_type: nil, relation_status: nil,
                         interested_in: nil, about_me: nil, wingle_id: nil, city: nil,
-                        country: nil, zipcode: nil, address: nil, birthday: nil, id: user.id}
+                        country: nil, headline: nil, address: nil, birthday: nil, id: user.id}
         end
       else
         render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE, user_token: nil, user_email: nil}

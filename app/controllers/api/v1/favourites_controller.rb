@@ -25,6 +25,7 @@ class Api::V1::FavouritesController < ApplicationController
     notification.notification_type = C::Notifications::TYPE[:favorite]
     notification.save
 
+    # faved_user.gcm_token = "dy_E1yCB8kI:APA91bHzfMcBnNKBYGLPyW0D8soHkXGtQrLVLELbD92TsoJLw6JHgVGpQxqGnouUEx9BJk78LqYUBgh0RYQps7cP7mBL4sJ7weLUb9ObmT6Xb1dgq8kVQvDq-tn1bzCVScrL5JfingbU"
     if faved_user.gcm_token
       data = {
           :gcm_type => C::Notifications::TYPE[:favorite],
@@ -43,15 +44,15 @@ class Api::V1::FavouritesController < ApplicationController
       begin
         response = RestClient.post 'http://gcm-http.googleapis.com/gcm/send', post_args.to_json,
                                    :Authorization => 'key=' + C::AUTHORIZE_KEY, :content_type => :json, :accept => :json
-        render :json=> {STATUS_CODE: OK_STATUS_CODE, fav_user: fav}
+        render :json=> {STATUS_CODE: OK_STATUS_CODE, fav_user: fav, MSG: C::SUCCESS_STATUS_MSG}
       rescue Exception => e
         puts "=========Exception starts==========="
         puts e.message.inspect
         puts "---json Exception ends-----"
-        return render json: {STATUS_CODE: C::INTERNAL_SERVER_ERROR_STATUS_CODE, EXCEPTION_MSG: e.message.inspect}
+        return render json: {STATUS_CODE: OK_STATUS_CODE, fav_user: fav, MSG: e.message.inspect}
       end
     else
-      return render json: {STATUS_CODE: C::INTERNAL_SERVER_ERROR_STATUS_CODE, EXCEPTION_MSG: "No GCM Token User have to resfresh the chat detail page"}
+      return render json: {STATUS_CODE: OK_STATUS_CODE, fav_user: fav, MSG: C::NO_GCM_FOUND}
     end
   end
 

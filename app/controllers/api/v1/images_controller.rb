@@ -72,8 +72,8 @@ class Api::V1::ImagesController < ApplicationController
       if params[:country]
         user_info.country = params[:country]
       end
-      if params[:zipcode]
-        user_info.zipcode = params[:zipcode]
+      if params[:headline]
+        user_info.headline = params[:headline]
       end
 
       # if params[:wingle_id] && params[:wingle_id] != ""

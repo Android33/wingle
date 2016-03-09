@@ -83,8 +83,8 @@ class Api::V1::UserinfosController < ApplicationController
       user_info.country = params[:country]
     end
 
-    if params[:zipcode]
-      user_info.zipcode = params[:zipcode]
+    if params[:headline]
+      user_info.headline = params[:headline]
     end
 
     user_info.save
