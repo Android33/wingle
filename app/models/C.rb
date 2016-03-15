@@ -15,6 +15,28 @@ module C
     TYPE = {favorite: "favorite", checkout: "checkout", like: "like", chat: "chat"}
   end
 
+  class FSettings
+    SHOW_ME_OF_GENDER_WITH_INTEREST = {SHOW_ME_WOMEN_LIKE_MEN: "Women who like men",
+      SHOW_ME_WOMEN_LIKE_WOMEN: "Women who like womem", SHOW_ME_ALL_WOMEN: "All women",
+      SHOW_ME_MEN_LIKE_WOMEN: "Men who like women", SHOW_ME_MEN_LIKE_MEN: "Men who like men",
+      SHOW_ME_ALL_MEN: "All men", SHOW_ME_ALL: "Everybody"}
+
+    SHOW_ME_CLOSE_TO = {SHOW_ME_CLOSE_TO_HERE: "SHOW_ME_CLOSE_TO_HERE",
+      SHOW_ME_CLOSE_TO_CITY: "SHOW_ME_CLOSE_TO_CITY", SHOW_ME_CLOSE_TO_STATE: "SHOW_ME_CLOSE_TO_STATE",
+      SHOW_ME_CLOSE_TO_COUNTRY: "SHOW_ME_CLOSE_TO_COUNTRY", SHOW_ME_CLOSE_TO_WORLD: "SHOW_ME_CLOSE_TO_WORLD"}
+
+    SHOW_ME_OF_AGE = {SHOW_ME_OF_AGE_MIN: "show_me_of_age_min", SHOW_ME_OF_AGE_MAX: "show_me_of_age_max",
+      SHOW_ME_OF_AGE_MIN_DEFAULT: "15", SHOW_ME_OF_AGE_MAX_DEFAULT: "60"}
+
+    GENDER = {MALE: "male", FEMALE: "female", UNKNOWN: "unknown"}
+
+    SHOW_ME_OF_ETHNICITY = {ETHNICITY_ALL: "ALL", ETHNICITY_LATINA_LATINO: "Latina/Latino",
+      ETHNICITY_BLACK_AFRICAN: "Black/African", ETHNICITY_NATIVE_ABORIGINAL: "Native/Aboriginal",
+      ETHNICITY_ASIAN: "Asian", ETHNICITY_EAST_INDIAN: "East Indian",
+      ETHNICITY_PACIFIC_ISLANDER: "Pacific Islander",ETHNICITY_WHITE_CAUCASIAN: "White/Caucasian",
+      ETHNICITY_MIDDLE_EASTERN: "Middle Eastern", ETHNICITY_MIXED_MULTI: "Mixed/Multi"}
+  end
+
   USER_INFO_FOUND = "USER_INFO_FOUND";
   NO_GCM_FOUND = "NO_GCM_FOUND";
   NO_USER_INFO = "NO_USER_INFO";

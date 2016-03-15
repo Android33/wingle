@@ -192,6 +192,153 @@ class Api::V1::UsersController < ApplicationController
     return render :json => {STATUS_CODE: OK_STATUS_CODE, users: users_array}
   end
 
+  def my_filter_users
+
+    user = User.find_by_email(params[:user_email])
+    if !user || params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
+    distance = 100
+    if user.fsetting
+      fsetting = user.fsetting
+    else
+      fsetting = Fsetting.new
+      fsetting.user_id = user.id
+      fsetting.save
+    end
+    # User.joins(:userinfo).where("userinfos.gender = ?", 'Male')
+    user_interested_in = C::FSettings::GENDER[:FEMALE]
+    user_gender = C::FSettings::GENDER[:MALE]
+
+    if fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_WOMEN_LIKE_MEN]
+      user_interested_in = C::FSettings::GENDER[:MALE]
+      user_gender = C::FSettings::GENDER[:FEMALE]
+
+    elsif fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_WOMEN_LIKE_WOMEN]
+      user_interested_in = C::FSettings::GENDER[:FEMALE]
+      user_gender = C::FSettings::GENDER[:FEMALE]
+
+    elsif fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_ALL_WOMEN]
+      user_interested_in = C::FSettings::GENDER[:UNKNOWN]
+      user_gender = C::FSettings::GENDER[:FEMALE]
+
+    elsif fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_MEN_LIKE_WOMEN]
+      user_interested_in = C::FSettings::GENDER[:FEMALE]
+      user_gender = C::FSettings::GENDER[:MALE]
+
+    elsif fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_MEN_LIKE_MEN]
+      user_interested_in = C::FSettings::GENDER[:MALE]
+      user_gender = C::FSettings::GENDER[:MALE]
+
+    elsif fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_ALL_MEN]
+      user_interested_in = C::FSettings::GENDER[:UNKNOWN]
+      user_gender = C::FSettings::GENDER[:MALE]
+
+    elsif fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_ALL]
+      user_interested_in = C::FSettings::GENDER[:UNKNOWN]
+      user_gender = C::FSettings::GENDER[:UNKNOWN]
+
+    end
+
+    if fsetting.show_me_close_to == C::FSettings::SHOW_ME_CLOSE_TO[:SHOW_ME_CLOSE_TO_HERE]
+      distance = 20
+    elsif fsetting.show_me_close_to == C::FSettings::SHOW_ME_CLOSE_TO[:SHOW_ME_CLOSE_TO_CITY]
+      distance = 50
+    elsif fsetting.show_me_close_to == C::FSettings::SHOW_ME_CLOSE_TO[:SHOW_ME_CLOSE_TO_STATE]
+      distance = 200
+    elsif fsetting.show_me_close_to == C::FSettings::SHOW_ME_CLOSE_TO[:SHOW_ME_CLOSE_TO_COUNTRY]
+      distance = 500
+    elsif fsetting.show_me_close_to == C::FSettings::SHOW_ME_CLOSE_TO[:SHOW_ME_CLOSE_TO_WORLD]
+      distance = 1000
+    end
+
+
+    if user.latitude != 0.0 && user.longitude != 0.0
+      users = User.near([user.latitude, user.longitude], distance, :order => "distance").joins(:userinfo)
+      if user_gender != C::FSettings::GENDER[:UNKNOWN] && user_interested_in != C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity != C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+          users = users.where("userinfos.gender = ? AND userinfos.interested_in = ? AND userinfos.ethnicity = ?", user_gender, user_interested_in, fsetting.show_me_of_ethnicity)
+      elsif user_gender == C::FSettings::GENDER[:UNKNOWN] && user_interested_in != C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity != C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+          users = users.where("userinfos.interested_in = ? AND userinfos.ethnicity = ?", user_interested_in, fsetting.show_me_of_ethnicity)
+      elsif user_gender == C::FSettings::GENDER[:UNKNOWN] && user_interested_in == C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity != C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+          users = users.where("userinfos.ethnicity = ?", fsetting.show_me_of_ethnicity)
+      elsif user_gender == C::FSettings::GENDER[:UNKNOWN] && user_interested_in == C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity == C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+
+
+      elsif user_gender == C::FSettings::GENDER[:UNKNOWN] && user_interested_in != C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity == C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+          users = users.where("userinfos.interested_in = ?", user_interested_in)
+      elsif user_gender != C::FSettings::GENDER[:UNKNOWN] && user_interested_in == C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity != C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+          users = users.where("userinfos.gender = ? AND userinfos.ethnicity = ?", user_gender, fsetting.show_me_of_ethnicity)
+      elsif user_gender != C::FSettings::GENDER[:UNKNOWN] && user_interested_in == C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity == C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+          users = users.where("userinfos.gender = ?", user_gender)
+
+      elsif user_gender != C::FSettings::GENDER[:UNKNOWN] && user_interested_in != C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity == C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+          users = users.where("userinfos.gender = ? AND userinfos.interested_in = ?", user_gender, user_interested_in)
+      end
+    else
+      if user_gender != C::FSettings::GENDER[:UNKNOWN] && user_interested_in != C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity != C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+          users = User.joins(:userinfo).where("userinfos.gender = ? AND userinfos.interested_in = ? AND userinfos.ethnicity = ?", user_gender, user_interested_in, fsetting.show_me_of_ethnicity)
+      elsif user_gender == C::FSettings::GENDER[:UNKNOWN] && user_interested_in != C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity != C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+          users = User.joins(:userinfo).where("userinfos.interested_in = ? AND userinfos.ethnicity = ?", user_interested_in, fsetting.show_me_of_ethnicity)
+      elsif user_gender == C::FSettings::GENDER[:UNKNOWN] && user_interested_in == C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity != C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+          users = User.joins(:userinfo).where("userinfos.ethnicity = ?", fsetting.show_me_of_ethnicity)
+      elsif user_gender == C::FSettings::GENDER[:UNKNOWN] && user_interested_in == C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity == C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+
+
+      elsif user_gender == C::FSettings::GENDER[:UNKNOWN] && user_interested_in != C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity == C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+          users = User.joins(:userinfo).where("userinfos.interested_in = ?", user_interested_in)
+      elsif user_gender != C::FSettings::GENDER[:UNKNOWN] && user_interested_in == C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity != C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+          users = User.joins(:userinfo).where("userinfos.gender = ? AND userinfos.ethnicity = ?", user_gender, fsetting.show_me_of_ethnicity)
+      elsif user_gender != C::FSettings::GENDER[:UNKNOWN] && user_interested_in == C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity == C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+          users = User.joins(:userinfo).where("userinfos.gender = ?", user_gender)
+
+      elsif user_gender != C::FSettings::GENDER[:UNKNOWN] && user_interested_in != C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity == C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
+          users = User.joins(:userinfo).where("userinfos.gender = ? AND userinfos.interested_in = ?", user_gender, user_interested_in)
+      end
+    end
+
+
+    users = users.where.not(:id => user.id)
+
+    # users = users.where("userinfos.birthday < ? AND userinfos.birthday > ?", (Time.now - fsetting.show_me_of_age_min.to_i.year), (Time.now - (fsetting.show_me_of_age_max).to_i.year))
+    users_array = []
+    puts "users"*80
+    puts "users #{users.inspect}"
+    # puts "users #{users.count}"
+
+    users && users.each do |near_user|
+      user_object = {}
+      puts "name: #{near_user.name}"
+      user_object["id"] = near_user.id
+      user_object["name"] = near_user.name
+      user_object["image_no"] = near_user.image_no
+      user_info = users.find(near_user.id).userinfo
+      if !user_info
+        next
+      end
+      user_age = ((Time.now - user_info.birthday) / 1.year).round
+      next if (user_age > fsetting.show_me_of_age_max.to_i || user_age < fsetting.show_me_of_age_min.to_i)
+
+      minutes = ((Time.now - near_user.last_sign_in_at) / 1.minute).round
+      if minutes < 10
+        user_object["is_online"] = true
+      else
+        user_object["is_online"] = false
+      end
+
+      if user.favourites.where(:fav_user_id => near_user.id).count > 0
+        user_object["is_favourite"] = true
+      else
+        user_object["is_favourite"] = false
+      end
+
+      users_array << user_object
+    end
+
+    return render :json => {STATUS_CODE: OK_STATUS_CODE, users: users_array}
+  end
+
   def login_signup
     puts params.inspect
     email = params[:user_email]

@@ -6,5 +6,6 @@ class CreateNotificationsTable < ActiveRecord::Migration
       t.integer :receiver_id
       t.timestamps
     end
+    add_index :notifications, :receiver_id
   end
 end

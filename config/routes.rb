@@ -29,6 +29,7 @@ Rails.application.routes.draw do
         collection do
           post 'near_users'
           post 'filter_users'
+          post 'my_filter_users'
           post 'login_signup'
           post 'userinfo'
           post 'search_with_wingle_id'
@@ -47,6 +48,7 @@ Rails.application.routes.draw do
           post 'all'
           post 'create'
           post 'destroy'
+          post 'favorited_me'
         end
       end
 
@@ -72,7 +74,7 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :gsettings do
+      resources :fsettings do
         collection do
           post 'update'
           post 'get'
