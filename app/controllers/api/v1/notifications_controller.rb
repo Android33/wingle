@@ -32,6 +32,55 @@ class Api::V1::NotificationsController < ApplicationController
   #   return render :json=> {STATUS_CODE: OK_STATUS_CODE}
   # end
 
+  def like
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
+    liked_user = User.find(params[:liked_user_id])
+
+
+    notification = Notification.new
+    # receiver.notifications.new
+    # you can call user.notifications.all for receiver notifications
+    notification.receiver_id = liked_user.id
+    notification.sender_id = user.id
+    notification.notification_type = C::Notifications::TYPE[:like]
+    notification.save
+
+    # faved_user.gcm_token = "dy_E1yCB8kI:APA91bHzfMcBnNKBYGLPyW0D8soHkXGtQrLVLELbD92TsoJLw6JHgVGpQxqGnouUEx9BJk78LqYUBgh0RYQps7cP7mBL4sJ7weLUb9ObmT6Xb1dgq8kVQvDq-tn1bzCVScrL5JfingbU"
+    if liked_user.gcm_token
+      data = {
+          :gcm_type => C::Notifications::TYPE[:like],
+          :user_name => user.name,
+          :notification_type => C::Notifications::TYPE[:favorite],
+          :user_id => user.id,
+          :receiver_id => liked_user.id
+      }
+      reg_tokens = [liked_user.gcm_token]
+      post_args = {
+          # :to field can also be used if there is only 1 reg token to send
+          :registration_ids => reg_tokens,
+          :data => data
+      }
+
+      begin
+        response = RestClient.post 'http://gcm-http.googleapis.com/gcm/send', post_args.to_json,
+                                   :Authorization => 'key=' + C::AUTHORIZE_KEY, :content_type => :json, :accept => :json
+        render :json=> {STATUS_CODE: OK_STATUS_CODE, MSG: C::SUCCESS_STATUS_MSG}
+      rescue Exception => e
+        puts "=========Exception starts==========="
+        puts e.message.inspect
+        puts "---json Exception ends-----"
+        return render json: {STATUS_CODE: OK_STATUS_CODE, MSG: e.message.inspect}
+      end
+    else
+      return render json: {STATUS_CODE: OK_STATUS_CODE, MSG: C::NO_GCM_FOUND}
+    end
+  end
+
   def all
     user = User.find_by_email(params[:user_email])
     if params[:user_token] != user.authentication_token

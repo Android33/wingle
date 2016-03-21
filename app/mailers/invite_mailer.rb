@@ -12,7 +12,7 @@ class InviteMailer < ActionMailer::Base
     #      subject: "Please see the Terms and Conditions attached",
     #      delivery_method_options: delivery_options)
     @mail_to_id = mail_to_id
-    mail(:to => mail_to_id, :subject => "Invitation to Wingle(Where people meet)", :from => "email.wingle@gmail.com")
+    mail(:to => mail_to_id, :subject => "Invitation to Wingle(Where people meet)", :from => "winglecorporation@gmail.com")
     #
     # mail(:to => email, :subject => "invitation", :from => "ionlaquete@gmail.com")
     return true

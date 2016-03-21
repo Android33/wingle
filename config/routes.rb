@@ -16,6 +16,9 @@ Rails.application.routes.draw do
         collection do
           post '/', to: 'sessions#create'
           post 'destroy'
+          post 'get_current_user'
+          post 'change_password'
+          post 'deactivate_account'
         end
       end
 
@@ -57,6 +60,7 @@ Rails.application.routes.draw do
           post 'all'
           post 'create'
           post 'destroy'
+          post 'like'
         end
       end
 
@@ -85,6 +89,7 @@ Rails.application.routes.draw do
         collection do
           post 'update'
           post 'get'
+          post 'update_show_my_location'
         end
       end
 
