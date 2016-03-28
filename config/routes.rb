@@ -98,6 +98,7 @@ Rails.application.routes.draw do
           post 'create'
           post 'by_user'
           post 'with_user'
+          post 'by_user_favorites'
         end
       end
 

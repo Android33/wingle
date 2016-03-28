@@ -462,10 +462,13 @@ class Api::V1::UsersController < ApplicationController
     user = User.find(params[:user_id])
     user.authentication_token = nil
     user.gcm_token = nil
+
+    last_seen_before_mins = ((Time.now - user.last_sign_in_at) / 1.minute).round
+
     if user.userinfo
-      return render json: {user: user, user_info: user.userinfo}
+      return render json: {user: user, user_info: user.userinfo, last_seen_before_mins: last_seen_before_mins}
     else
-      return render json: {user: user}
+      return render json: {user: user, last_seen_before_mins: last_seen_before_mins}
     end
   end
 

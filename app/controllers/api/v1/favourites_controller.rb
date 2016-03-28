@@ -14,7 +14,7 @@ class Api::V1::FavouritesController < ApplicationController
     faved_user = User.find(params[:fav_user_id])
     fav = user.favourites.where(:fav_user_id => faved_user.id)
     if fav.present?
-      
+
     else
       fav = user.favourites.new
       fav.fav_user_id = faved_user.id
@@ -129,6 +129,7 @@ class Api::V1::FavouritesController < ApplicationController
       user_object["surname"] =  fav_user.surname
       user_object["image_no"] =  fav_user.image_no
       user_object["poke_count"] =  "plz implement"
+      user_object["gender"] =  fav_user.userinfo.gender
 
       users_array << user_object
     end
