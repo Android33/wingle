@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160313065344) do
+ActiveRecord::Schema.define(version: 20160329044901) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -72,6 +72,16 @@ ActiveRecord::Schema.define(version: 20160313065344) do
   end
 
   add_index "images", ["user_id"], name: "index_images_on_user_id", using: :btree
+
+  create_table "lastchatseens", force: true do |t|
+    t.integer  "user_id"
+    t.integer  "sender_id"
+    t.integer  "chat_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "lastchatseens", ["user_id"], name: "index_lastchatseens_on_user_id", using: :btree
 
   create_table "notifications", force: true do |t|
     t.string   "notification_type"

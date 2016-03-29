@@ -155,7 +155,7 @@ class Api::V1::ChatsController < ApplicationController
     chat_user_ids && chat_user_ids.each do |chat_user_id|
 
       puts "before find chats"
-      chats = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user_id.to_i, chat_user_id.to_i).last
+      last_msg = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user_id.to_i, chat_user_id.to_i).last
       chat_user = User.find(chat_user_id)
       chat_object = {}
       minutes = ((Time.now - chat_user.last_sign_in_at) / 1.minute).round
@@ -168,8 +168,38 @@ class Api::V1::ChatsController < ApplicationController
       chat_object["chat_user_email"] = chat_user.email
       chat_object["chat_user_id"] = chat_user.id
       chat_object["chat_user_image_no"] = chat_user.image_no
-      chat_object["last_msg"] = chats
-#      chats_array["chat_user_email"] = chat_user.email
+      chat_object["last_msg"] = last_msg
+
+      if user.lastchatseens.where(:sender_id => chat_user_id.to_i).present?
+        lastchatseens = user.lastchatseens.where(:sender_id => chat_user_id.to_i).first
+        puts "if lastchatseens #{lastchatseens.inspect}"
+      else
+        lastchatseens = user.lastchatseens.new
+        lastchatseens.sender_id = chat_user.id
+        lastchatseens.chat_id = user.chats.where(:sender_id => chat_user_id.to_i).first.id
+        lastchatseens.save
+        puts "else lastchatseens #{lastchatseens.inspect}"
+      end
+      puts "lastchatseens #{lastchatseens.inspect}"
+      puts "lastchatseens #{lastchatseens.chat_id}"
+      if lastchatseens.chat_id.blank?
+        lastchatseens.chat_id = user.chats.where(:sender_id => chat_user_id.to_i).first.id
+        lastchatseens.save
+      end
+
+      if user.chats.where(:sender_id => chat_user_id.to_i).present?
+        last_unseen_msg = user.chats.find(lastchatseens.chat_id)
+        msgs = user.chats.where("sender_id = ? AND created_at >= ?", chat_user_id.to_i, last_unseen_msg.created_at)
+        puts "msgs"*10
+        puts "msgs #{msgs.inspect}"
+        chat_object["unseen_msgs"] = user.chats.where("sender_id = ? AND created_at >= ?", chat_user_id.to_i, last_unseen_msg.created_at).count
+      else
+        chat_object["unseen_msgs"] = 0
+      end
+
+      puts "chat_object #{chat_object}"
+
+      #      chats_array["chat_user_email"] = chat_user.email
       chats_array << chat_object
     end
 
@@ -193,6 +223,17 @@ class Api::V1::ChatsController < ApplicationController
       is_online = false
     end
 
+    if user.lastchatseens.where(:sender_id => chat_user.id).present?
+      lastchatseens = user.lastchatseens.where(:sender_id => chat_user.id).first
+    else
+      lastchatseens = user.lastchatseens.new
+      lastchatseens.sender_id = chat_user.id
+    end
+
+    if chats.where(:sender_id => chat_user.id).present?
+      lastchatseens.chat_id = chats.where(:sender_id => chat_user.id).last.id
+    end
+    lastchatseens.save
 
     render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: chat_user.name,
                   chat_user_email: chat_user.email, is_online: is_online, chat_user_id: chat_user.id,
