@@ -29,6 +29,19 @@ class Api::V1::ChatsController < ApplicationController
       is_online = false
     end
 
+    if params[:image_text]
+      chatimage = Chatimage.new
+      image.img = parse_image_data(params[:image_text])
+      image.sender_id = user.id
+      image.receiver_id = receiver.id
+      image.chat_id = chat.id
+      image.save!
+      chat.chatimage_id = image.id
+      chat.save
+      # ensure
+      clean_tempfile
+    end
+
     # receiver.gcm_token = "c-Vm5OpwHf4:APA91bEFf_B_nAYGV9fIuVY_A6IcswJ7AzKTvq5QkLP_jgeGzaR0xqhFU0AUYN_FY6UBk2pgEZD1a4nemR78Rp0g219SNOpEiWdSHCGN3WZPSyBmKWCVgK4uzhYMJCMLtVD0yMFHW9yw"
     if receiver.gcm_token
       data = {
@@ -238,5 +251,36 @@ class Api::V1::ChatsController < ApplicationController
     render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: chat_user.name,
                   chat_user_email: chat_user.email, is_online: is_online, chat_user_id: chat_user.id,
                   chat_user_image_no: chat_user.image_no, chat: chats}
+  end
+
+  def parse_image_data(base64_image)
+    filename = "upload-image"
+    in_content_type, encoding, string = base64_image.split(/[:;,]/)[1..3]
+
+    @tempfile = Tempfile.new(filename)
+    @tempfile.binmode
+    @tempfile.write Base64.decode64(string)
+    @tempfile.rewind
+
+    # for security we want the actual content type, not just what was passed in
+    content_type = `file --mime -b #{@tempfile.path}`.split(";")[0]
+
+    # we will also add the extension ourselves based on the above
+    # if it's not gif/jpeg/png, it will fail the validation in the upload model
+    extension = content_type.match(/gif|jpeg|png/).to_s
+    filename += ".#{extension}" if extension
+
+    ActionDispatch::Http::UploadedFile.new({
+      tempfile: @tempfile,
+      content_type: content_type,
+      filename: filename
+    })
+  end
+
+  def clean_tempfile
+    if @tempfile
+      @tempfile.close
+      @tempfile.unlink
+    end
   end
 end

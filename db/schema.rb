@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160329044901) do
+ActiveRecord::Schema.define(version: 20160330155734) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -25,12 +25,24 @@ ActiveRecord::Schema.define(version: 20160329044901) do
 
   add_index "blockeds", ["user_id"], name: "index_blockeds_on_user_id", using: :btree
 
+  create_table "chatimages", force: true do |t|
+    t.string   "img"
+    t.integer  "chat_id"
+    t.integer  "sender_id"
+    t.integer  "receiver_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "chatimages", ["chat_id"], name: "index_chatimages_on_chat_id", using: :btree
+
   create_table "chats", force: true do |t|
     t.string   "chat_msg"
     t.integer  "sender_id"
     t.integer  "receiver_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "chatimage_id"
   end
 
   create_table "chats_users", id: false, force: true do |t|
@@ -90,6 +102,8 @@ ActiveRecord::Schema.define(version: 20160329044901) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "notifications", ["receiver_id"], name: "index_notifications_on_receiver_id", using: :btree
 
   create_table "nsettings", force: true do |t|
     t.integer  "user_id"
