@@ -11,7 +11,11 @@ class Api::V1::ChatsController < ApplicationController
     update_latlong(user, params[:latitude], params[:longitude])
 
     receiver_id = params[:receiver_id]
-    chat_msg = params[:chat_msg]
+    if params[:chat_msg].present?
+      chat_msg = params[:chat_msg]
+    else
+      chat_msg = "nil"
+    end
     receiver = User.find(receiver_id)
     chat = Chat.new
     chat.chat_msg = chat_msg
@@ -30,7 +34,7 @@ class Api::V1::ChatsController < ApplicationController
     end
 
     if params[:image_text]
-      chatimage = Chatimage.new
+      image = Chatimage.new
       image.img = parse_image_data(params[:image_text])
       image.sender_id = user.id
       image.receiver_id = receiver.id
@@ -195,7 +199,7 @@ class Api::V1::ChatsController < ApplicationController
       end
       puts "lastchatseens #{lastchatseens.inspect}"
       puts "lastchatseens #{lastchatseens.chat_id}"
-      if lastchatseens.chat_id.blank?
+      if lastchatseens.chat_id.blank? && user.chats.where(:sender_id => chat_user_id.to_i).first.present?
         lastchatseens.chat_id = user.chats.where(:sender_id => chat_user_id.to_i).first.id
         lastchatseens.save
       end
