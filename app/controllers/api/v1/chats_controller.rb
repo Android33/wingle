@@ -81,6 +81,48 @@ class Api::V1::ChatsController < ApplicationController
     end
   end
 
+  def delete
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
+    puts "params #{params.inspect}"
+
+    Chat.destroy(params[:chat_msg_id])
+    receiver = User.find(params[:receiver_id])
+    minutes = ((Time.now - receiver.last_sign_in_at) / 1.minute).round
+    if minutes < 10
+      is_online = true
+    else
+      is_online = false
+    end
+
+    chats = user.chats.where("sender_id = ? OR receiver_id = ?", receiver.id, receiver.id)
+
+
+    render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: receiver.name,
+                      chat_user_email: receiver.email, is_online: is_online, chat_user_id: receiver.id, chat_user_image_no: receiver.image_no, chat: chats, MSG: C::SUCCESS_STATUS_MSG}
+  end
+
+  def delete_all
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
+    puts "params #{params.inspect}"
+
+
+    chats = user.chats.where("sender_id = ? OR receiver_id = ?", params[:receiver_id], params[:receiver_id])
+    chats.destroy_all
+
+
+    render json: {STATUS_CODE: OK_STATUS_CODE, MSG: C::SUCCESS_STATUS_MSG}
+  end
+
   def by_user_all
     user = User.find_by_email(params[:user_email])
     if params[:user_token] != user.authentication_token

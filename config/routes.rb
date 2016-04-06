@@ -99,6 +99,8 @@ Rails.application.routes.draw do
           post 'by_user'
           post 'with_user'
           post 'by_user_favorites'
+          post 'delete'
+          post 'delete_all'
         end
       end
 
