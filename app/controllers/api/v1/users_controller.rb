@@ -50,6 +50,15 @@ class Api::V1::UsersController < ApplicationController
       else
         user_object["is_favourite"] = false
       end
+
+      blocked_ids = user.blockeds.pluck(:blocked_user_id)
+      puts "blocked_ids #{blocked_ids.inspect}"
+      if blocked_ids && (blocked_ids.include? near_user.id)
+        user_object["is_blocked"] = true
+      else
+        user_object["is_blocked"] = false
+      end
+
       users_array << user_object
     end
 
@@ -331,6 +340,14 @@ class Api::V1::UsersController < ApplicationController
         user_object["is_favourite"] = true
       else
         user_object["is_favourite"] = false
+      end
+
+      blocked_ids = user.blockeds.pluck(:blocked_user_id)
+      puts "blocked_ids #{blocked_ids.inspect}"
+      if blocked_ids && (blocked_ids.include? near_user.id)
+        user_object["is_blocked"] = true
+      else
+        user_object["is_blocked"] = false
       end
 
       users_array << user_object

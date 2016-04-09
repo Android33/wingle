@@ -97,6 +97,14 @@ class Api::V1::FavouritesController < ApplicationController
       user_object["surname"] =  fav_user.surname
       user_object["image_no"] =  fav_user.image_no
       user_object["poke_count"] =  "plz implement"
+      user_object["is_favourite"] =  true
+
+      blocked_ids = user.blockeds.pluck(:blocked_user_id)
+      if blocked_ids && (blocked_ids.include? fav_user_id)
+        user_object["is_blocked"] = true
+      else
+        user_object["is_blocked"] = false
+      end
 
       users_array << user_object
     end

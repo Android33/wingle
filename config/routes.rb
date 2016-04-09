@@ -55,6 +55,14 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :blockeds do
+        collection do
+          post 'all'
+          post 'create'
+          post 'destroy'
+        end
+      end
+
       resources :notifications do
         collection do
           post 'all'
