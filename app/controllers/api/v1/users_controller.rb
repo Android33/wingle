@@ -365,6 +365,9 @@ class Api::V1::UsersController < ApplicationController
     token = nil
     if user
       if user.valid_password?(password)
+        if params[:login_type].present?
+          user.login_type = params[:login_type]
+        end
         puts "inside valid password"
         update_latlong(user, params[:latitude], params[:longitude])
         if user.userinfo
@@ -396,6 +399,7 @@ class Api::V1::UsersController < ApplicationController
       newUser = User.new;
       newUser.email = email;
       newUser.name = name;
+      newUser.login_type = login_type
       newUser.password = password;
       token = newUser.authentication_token;
       if newUser.save

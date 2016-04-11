@@ -71,7 +71,7 @@ class Api::V1::SessionsController < ApplicationController
     else
       puts "not changed\n"*10
       puts user.password
-      render json: {STATUS_MSG: C::FAILURE_STATUS_MSG, STATUS_CODE: C::UNAUTHORIZED_STATUS_CODE}
+      render json: {STATUS_MSG: C::FAILURE_STATUS_MSG, STATUS_CODE: C::UNAUTHORIZED_STATUS_CODE, login_type: user.login_type}
     end
   end
 
