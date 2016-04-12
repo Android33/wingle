@@ -70,7 +70,41 @@ class Api::V1::FavouritesController < ApplicationController
     fav = user.favourites.where(:fav_user_id => params[:fav_user_id])
     fav.destroy_all
 
-    return render :json=> {STATUS_CODE: OK_STATUS_CODE}
+    user_ids = user.favourites.all.pluck(:fav_user_id)
+    users_array = []
+
+    user_ids && user_ids.each do |fav_user_id|
+      # fav_user = User.find(fav_user_id)
+      fav_user = User.where("id = ? AND name ILIKE ?",fav_user_id, "%#{params[:query]}%").first
+      if fav_user.blank?
+        puts "matching users"*20
+        next
+      end
+      minutes = ((Time.now - fav_user.last_sign_in_at) / 1.minute).round
+      user_object = {}
+      if minutes < 10
+        user_object["is_online"] = true
+      else
+        user_object["is_online"] = false
+      end
+      user_object["id"] =  fav_user.id
+      user_object["name"] =  fav_user.name
+      user_object["surname"] =  fav_user.surname
+      user_object["image_no"] =  fav_user.image_no
+      user_object["poke_count"] =  "plz implement"
+      user_object["is_favourite"] =  true
+
+      blocked_ids = user.blockeds.pluck(:blocked_user_id)
+      if blocked_ids && (blocked_ids.include? fav_user_id)
+        user_object["is_blocked"] = true
+      else
+        user_object["is_blocked"] = false
+      end
+
+      users_array << user_object
+    end
+
+    return render :json=> {STATUS_CODE: OK_STATUS_CODE, users: users_array}
   end
 
   def all
@@ -84,7 +118,12 @@ class Api::V1::FavouritesController < ApplicationController
     users_array = []
 
     user_ids && user_ids.each do |fav_user_id|
-      fav_user = User.find(fav_user_id)
+      # fav_user = User.find(fav_user_id)
+      fav_user = User.where("id = ? AND name ILIKE ?",fav_user_id, "%#{params[:query]}%").first
+      if fav_user.blank?
+        puts "matching users"*20
+        next
+      end
       minutes = ((Time.now - fav_user.last_sign_in_at) / 1.minute).round
       user_object = {}
       if minutes < 10

@@ -170,6 +170,7 @@ class Api::V1::ChatsController < ApplicationController
     #    remove current user id
     chat_user_ids -= [user.id]
     chats_array = []
+    unseen_msgs_total = 0
     chat_user_ids && chat_user_ids.each do |chat_user_id|
 
       puts "before find chats"
@@ -210,11 +211,12 @@ class Api::V1::ChatsController < ApplicationController
       else
         chat_object["unseen_msgs"] = 0
       end
+      unseen_msgs_total += chat_object["unseen_msgs"]
 #      chats_array["chat_user_email"] = chat_user.email
       chats_array << chat_object
     end
 
-    render json: {STATUS_CODE: OK_STATUS_CODE, chats: chats_array}
+    render json: {STATUS_CODE: OK_STATUS_CODE, chats: chats_array, unseen_msgs_total: unseen_msgs_total}
   end
 
   def by_user_favorites
@@ -234,6 +236,7 @@ class Api::V1::ChatsController < ApplicationController
     #    remove current user id
     chat_user_ids -= [user.id]
     chats_array = []
+    unseen_msgs_total = 0
     chat_user_ids && chat_user_ids.each do |chat_user_id|
 
       puts "before find chats"
@@ -281,10 +284,11 @@ class Api::V1::ChatsController < ApplicationController
       puts "chat_object #{chat_object}"
 
       #      chats_array["chat_user_email"] = chat_user.email
+      unseen_msgs_total += chat_object["unseen_msgs"]
       chats_array << chat_object
     end
 
-    render json: {STATUS_CODE: OK_STATUS_CODE, chats: chats_array}
+    render json: {STATUS_CODE: OK_STATUS_CODE, chats: chats_array, unseen_msgs_total: unseen_msgs_total}
   end
 
   def with_user

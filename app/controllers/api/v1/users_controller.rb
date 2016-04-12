@@ -29,6 +29,10 @@ class Api::V1::UsersController < ApplicationController
     distance = 50
     users = User.near([latitude, longitude], distance, :order => "distance")
     users = users.where.not(:id => user.id)
+    if params[:query].present? && params[:query] != ""
+      puts "matching users"*20
+      users = users.where("name ILIKE ?", "%#{params[:query]}%")
+    end
 
     users_array = []
 
@@ -309,7 +313,10 @@ class Api::V1::UsersController < ApplicationController
 
 
     users = users.where.not(:id => user.id)
-
+    if params[:query].present? && params[:query] != ""
+      puts "matching users"*20
+      users = users.where("name ILIKE ?", "%#{params[:query]}%")
+    end
     # users = users.where("userinfos.birthday < ? AND userinfos.birthday > ?", (Time.now - fsetting.show_me_of_age_min.to_i.year), (Time.now - (fsetting.show_me_of_age_max).to_i.year))
     users_array = []
     puts "users"*80
