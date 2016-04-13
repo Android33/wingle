@@ -12,6 +12,17 @@ class Api::V1::ImagesController < ApplicationController
     return render :json => {STATUS_CODE: OK_STATUS_CODE, image: image}
   end
 
+  def get_all_dps
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+    images = user.images.where.not(:user_img_count => user.image_no)
+
+    return render :json => {STATUS_CODE: OK_STATUS_CODE, images: images}
+  end
+
   def upload_image_with_url
     user = User.find_by_email(params[:user_email])
     if !user
