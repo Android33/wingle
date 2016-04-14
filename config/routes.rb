@@ -77,6 +77,7 @@ Rails.application.routes.draw do
           post 'upload_img_with_file'
           post 'upload_image_with_url'
           post 'get_all_dps'
+          post 'change_dp'
         end
       end
 
