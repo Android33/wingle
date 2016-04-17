@@ -255,6 +255,13 @@ class Api::V1::UsersController < ApplicationController
 
     end
 
+    puts "Info Starts"*10
+    puts "user_interested_in #{user_interested_in}"
+    puts "user_gender #{user_gender}"
+    puts "user.latitude #{user.latitude}"
+    puts "user.longitude #{user.longitude}"
+    puts "Info Ends"*10
+
     if fsetting.show_me_close_to == C::FSettings::SHOW_ME_CLOSE_TO[:SHOW_ME_CLOSE_TO_HERE]
       distance = 20
     elsif fsetting.show_me_close_to == C::FSettings::SHOW_ME_CLOSE_TO[:SHOW_ME_CLOSE_TO_CITY]

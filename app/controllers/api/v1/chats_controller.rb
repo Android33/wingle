@@ -173,7 +173,7 @@ class Api::V1::ChatsController < ApplicationController
     unseen_msgs_total = 0
     chat_user_ids && chat_user_ids.each do |chat_user_id|
 
-      puts "before find chats"
+      puts "#{user.id} #{chat_user_id}"
       last_msg = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user_id.to_i, chat_user_id.to_i).last
       chat_user = User.find(chat_user_id)
       chat_object = {}
@@ -207,7 +207,7 @@ class Api::V1::ChatsController < ApplicationController
       if user.chats.where(:sender_id => chat_user_id.to_i).present?
         last_unseen_msg = user.chats.find(lastchatseens.chat_id)
         msgs = user.chats.where("sender_id = ? AND created_at >= ?", chat_user_id.to_i, last_unseen_msg.created_at)
-        chat_object["unseen_msgs"] = user.chats.where("sender_id = ? AND created_at >= ?", chat_user_id.to_i, last_unseen_msg.created_at).count - 1
+        chat_object["unseen_msgs"] = user.chats.where("sender_id = ? AND created_at > ?", chat_user_id.to_i, last_unseen_msg.created_at).count
       else
         chat_object["unseen_msgs"] = 0
       end

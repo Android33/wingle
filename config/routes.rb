@@ -69,6 +69,8 @@ Rails.application.routes.draw do
           post 'create'
           post 'destroy'
           post 'like'
+          post 'get_notification_chat_count'
+          post 'set_seen'
         end
       end
 
