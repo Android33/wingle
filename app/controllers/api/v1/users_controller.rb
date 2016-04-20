@@ -499,11 +499,14 @@ class Api::V1::UsersController < ApplicationController
     user.gcm_token = nil
 
     last_seen_before_mins = ((Time.now - user.last_sign_in_at) / 1.minute).round
+    age = ((Time.now - user.userinfo.birthday) / 1.year).round
+
+    puts "age #{age}"*80
 
     if user.userinfo
-      return render json: {user: user, user_info: user.userinfo, last_seen_before_mins: last_seen_before_mins}
+      return render json: {user: user, user_info: user.userinfo, last_seen_before_mins: last_seen_before_mins, age: age}
     else
-      return render json: {user: user, last_seen_before_mins: last_seen_before_mins}
+      return render json: {user: user, last_seen_before_mins: last_seen_before_mins, age: age}
     end
   end
 
