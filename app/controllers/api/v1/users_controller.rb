@@ -318,11 +318,12 @@ class Api::V1::UsersController < ApplicationController
       end
     end
 
-
-    users = users.where.not(:id => user.id)
-    if params[:query].present? && params[:query] != ""
-      puts "matching users"*20
-      users = users.where("name ILIKE ?", "%#{params[:query]}%")
+    if users
+      users = users.where.not(:id => user.id)
+      if params[:query].present? && params[:query] != ""
+        puts "matching users"*20
+        users = users.where("name ILIKE ?", "%#{params[:query]}%")
+      end
     end
     # users = users.where("userinfos.birthday < ? AND userinfos.birthday > ?", (Time.now - fsetting.show_me_of_age_min.to_i.year), (Time.now - (fsetting.show_me_of_age_max).to_i.year))
     users_array = []
