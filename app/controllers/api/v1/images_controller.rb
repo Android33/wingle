@@ -20,7 +20,19 @@ class Api::V1::ImagesController < ApplicationController
     update_latlong(user, params[:latitude], params[:longitude])
     images = user.images.where.not(:user_img_count => user.image_no)
 
-    return render :json => {STATUS_CODE: OK_STATUS_CODE, images: images}
+    return render :json => {STATUS_CODE: OK_STATUS_CODE, images: images, name: user.name}
+  end
+
+  def get_all_dps_of
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+    user_ = User.find(params[:user_id])
+    images = user_.images.all
+
+    return render :json => {STATUS_CODE: OK_STATUS_CODE, images: images, name: user_.name}
   end
 
   def change_dp
