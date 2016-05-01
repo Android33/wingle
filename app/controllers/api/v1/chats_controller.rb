@@ -123,6 +123,18 @@ class Api::V1::ChatsController < ApplicationController
     render json: {STATUS_CODE: OK_STATUS_CODE, MSG: C::SUCCESS_STATUS_MSG}
   end
 
+  def delete_all_chats
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
+    user.chats.destroy_all
+
+    render json: {STATUS_CODE: OK_STATUS_CODE, MSG: C::SUCCESS_STATUS_MSG}
+  end
+
   def by_user_all
     user = User.find_by_email(params[:user_email])
     if params[:user_token] != user.authentication_token

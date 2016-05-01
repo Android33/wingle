@@ -114,6 +114,7 @@ Rails.application.routes.draw do
           post 'by_user_favorites'
           post 'delete'
           post 'delete_all'
+          post 'delete_all_chats'
         end
       end
 
