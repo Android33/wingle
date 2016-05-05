@@ -81,6 +81,7 @@ Rails.application.routes.draw do
           post 'get_all_dps'
           post 'get_all_dps_of'
           post 'change_dp'
+          post 'delete_image'
         end
       end
 

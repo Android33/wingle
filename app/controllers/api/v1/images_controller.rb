@@ -23,6 +23,18 @@ class Api::V1::ImagesController < ApplicationController
     return render :json => {STATUS_CODE: OK_STATUS_CODE, images: images, name: user.name}
   end
 
+  def delete_image
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
+    Image.find(params["image_id"]).destroy
+
+    return render :json => {STATUS_CODE: OK_STATUS_CODE}
+  end
+
   def get_all_dps_of
     user = User.find_by_email(params[:user_email])
     if params[:user_token] != user.authentication_token

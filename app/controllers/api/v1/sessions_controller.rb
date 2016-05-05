@@ -38,15 +38,16 @@ class Api::V1::SessionsController < ApplicationController
       return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
     end
     update_latlong(user, params[:latitude], params[:longitude])
+    images = user.images.where.not(:user_img_count => user.image_no)
 
     if user.userinfo
       info = user.userinfo
       render json: {STATUS_MSG: "USER_INFO_FOUND", STATUS_CODE: OK_STATUS_CODE, user_token: user.authentication_token, user_email: user.email, name: user.name, image_id: user.image_id,
                     gender: info.gender, height: info.height, ethnicity: info.ethnicity, body_type: info.body_type, relation_status: info.relation_status,
-                    interested_in: info.interested_in, about_me: info.about_me, wingle_id: info.wingle_id, city: info.city, id: user.id, image_no: user.image_no,
+                    interested_in: info.interested_in, about_me: info.about_me, wingle_id: info.wingle_id, city: info.city, id: user.id, image_no: user.image_no, images: images,
                     country: info.country, headline: info.headline, address: info.address, birthday: info.birthday}
     else
-      render json: {STATUS_MSG: "NO_USER_INFO", STATUS_CODE: OK_STATUS_CODE, user_token: user.authentication_token, user_email: user.email, name: user.name, image_id: user.image_id, gender: nil, height: nil,
+      render json: {STATUS_MSG: "NO_USER_INFO", STATUS_CODE: OK_STATUS_CODE, user_token: user.authentication_token, user_email: user.email, name: user.name, image_id: user.image_id, gender: nil, height: nil, images: images, 
                     ethnicity: nil, body_type: nil, relation_status: nil, id: user.id, image_no: user.image_no,
                     interested_in: nil, about_me: nil, wingle_id: nil, city: nil,
                     country: nil, headline: nil, address: nil, birthday: nil}
