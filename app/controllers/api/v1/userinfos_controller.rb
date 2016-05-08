@@ -27,7 +27,7 @@ class Api::V1::UserinfosController < ApplicationController
       image = Image.new
       image.img = parse_image_data(params[:image_text])
       image.user_id = user.id
-      image.user_img_count = user.images.count + 1
+      image.user_img_count = (user.image_no.to_i + 1) | 1
       image.save!
       user.image_id = image.id
       user.image_no = image.user_img_count
@@ -87,8 +87,10 @@ class Api::V1::UserinfosController < ApplicationController
       user_info.headline = params[:headline]
     end
 
+    images = user.images.where.not(:user_img_count => user.image_no)
+
     user_info.save
-    render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info}
+    render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info, images: images}
   end
 
   def update_wingle_id

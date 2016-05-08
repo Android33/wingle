@@ -32,7 +32,9 @@ class Api::V1::ImagesController < ApplicationController
 
     Image.find(params["image_id"]).destroy
 
-    return render :json => {STATUS_CODE: OK_STATUS_CODE}
+    images = user.images.where.not(:user_img_count => user.image_no)
+
+    return render :json => {STATUS_CODE: OK_STATUS_CODE, user: user, images: images}
   end
 
   def get_all_dps_of
