@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160417203923) do
+ActiveRecord::Schema.define(version: 20160509113934) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -177,6 +177,7 @@ ActiveRecord::Schema.define(version: 20160417203923) do
     t.string   "image_id"
     t.string   "image_no"
     t.boolean  "is_account_active",      default: true
+    t.integer  "imagecount",             default: 0
   end
 
   add_index "users", ["authentication_token"], name: "index_users_on_authentication_token", using: :btree

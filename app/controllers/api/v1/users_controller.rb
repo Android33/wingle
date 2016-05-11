@@ -495,19 +495,26 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def get_user
-    user = User.find(params[:user_id])
-    user.authentication_token = nil
-    user.gcm_token = nil
+    user = User.find_by_email(params[:user_email])
 
-    last_seen_before_mins = ((Time.now - user.last_sign_in_at) / 1.minute).round
-    age = ((Time.now - user.userinfo.birthday) / 1.year).round
+    public_user = User.find(params[:user_id])
+    if user.favourites.where(:fav_user_id => public_user.id).present?
+      is_favourite = true
+    else
+      is_favourite = false
+    end
+    public_user.authentication_token = nil
+    public_user.gcm_token = nil
+
+    last_seen_before_mins = ((Time.now - public_user.last_sign_in_at) / 1.minute).round
+    age = ((Time.now - public_user.userinfo.birthday) / 1.year).round
 
     puts "age #{age}"*80
 
-    if user.userinfo
-      return render json: {user: user, user_info: user.userinfo, last_seen_before_mins: last_seen_before_mins, age: age}
+    if public_user.userinfo
+      return render json: {is_favourite: is_favourite, user: public_user, user_info: public_user.userinfo, last_seen_before_mins: last_seen_before_mins, age: age}
     else
-      return render json: {user: user, last_seen_before_mins: last_seen_before_mins, age: age}
+      return render json: {is_favourite: is_favourite, user: public_user, last_seen_before_mins: last_seen_before_mins, age: age}
     end
   end
 
