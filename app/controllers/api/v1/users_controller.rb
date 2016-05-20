@@ -377,12 +377,8 @@ class Api::V1::UsersController < ApplicationController
     password = params[:user_password]
 
     user = User.find_by_email(email)
-    if user.nsetting
+    if user && user.nsetting
       nsetting = user.nsetting
-    else
-      nsetting = Nsetting.new
-      nsetting.user_id = user.id
-      nsetting.save
     end
     token = nil
     if user
@@ -425,8 +421,12 @@ class Api::V1::UsersController < ApplicationController
       newUser.password = password;
       token = newUser.authentication_token;
       if newUser.save
+        nsetting = Nsetting.new
+        nsetting.user_id = newUser.id
+        nsetting.save
+
         update_latlong(newUser, params[:latitude], params[:longitude])
-        render json: {STATUS_CODE: OK_STATUS_CODE, user_token: newUser.authentication_token, user_email: newUser.email, STATUS_MSG: NO_USER_INFO, id: newUser.id}
+        render json: {STATUS_CODE: OK_STATUS_CODE, user_token: newUser.authentication_token, user_email: newUser.email, STATUS_MSG: NO_USER_INFO, id: newUser.id, nsetting: nsetting}
       else
         render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE, user_token: nil, user_email: nil}
       end
