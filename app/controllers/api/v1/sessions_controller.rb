@@ -46,7 +46,7 @@ class Api::V1::SessionsController < ApplicationController
       return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
     end
     update_latlong(user, params[:latitude], params[:longitude])
-    images = user.images.where.not(:user_img_count => user.image_no)
+    images = user.images.where.not(:user_img_count => user.image_no).order(order: :asc)
 
     if user.userinfo
       info = user.userinfo

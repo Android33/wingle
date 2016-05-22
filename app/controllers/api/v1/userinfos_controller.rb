@@ -18,6 +18,12 @@ class Api::V1::UserinfosController < ApplicationController
     end
     if params[:image_id]
       image = Image.find(params[:image_id])
+      current_profile_image = Image.find(user.image_id)
+      image_order = image.order
+      image.order = current_profile_image.order
+      current_profile_image.order = image_order
+      current_profile_image.save
+      image.save
       user.image_id = image.id
       user.image_no = image.user_img_count
       user.save
@@ -88,7 +94,40 @@ class Api::V1::UserinfosController < ApplicationController
       user_info.headline = params[:headline]
     end
 
-    images = user.images.where.not(:user_img_count => user.image_no)
+    images = user.images.where.not(:user_img_count => user.image_no).order(order: :asc)
+
+    user_info.save
+    render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info, images: images}
+  end
+
+  def upload_text_image
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
+    if params[:image_text]
+      image = Image.new
+      image.img = parse_image_data(params[:image_text])
+      image.user_id = user.id
+      image.user_img_count = (user.imagecount + 1) | 1
+      image.order = (user.imagecount + 1) | 1
+      image.save!
+      user.imagecount = (user.imagecount + 1) | 1
+      user.save
+      # ensure
+      clean_tempfile
+    end
+
+    if user.userinfo
+      user_info = user.userinfo
+    else
+      user_info = Userinfo.new
+      user_info.user_id = user.id
+    end
+
+    images = user.images.where.not(:user_img_count => user.image_no).order(order: :asc)
 
     user_info.save
     render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info, images: images}

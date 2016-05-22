@@ -89,6 +89,7 @@ Rails.application.routes.draw do
         collection do
           post 'create'
           post 'update_wingle_id'
+          post 'upload_text_image'
         end
       end
 

@@ -18,7 +18,7 @@ class Api::V1::ImagesController < ApplicationController
       return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
     end
     update_latlong(user, params[:latitude], params[:longitude])
-    images = user.images.where.not(:user_img_count => user.image_no)
+    images = user.images.where.not(:user_img_count => user.image_no).order(order: :asc)
 
     return render :json => {STATUS_CODE: OK_STATUS_CODE, images: images, name: user.name}
   end
@@ -32,7 +32,7 @@ class Api::V1::ImagesController < ApplicationController
 
     Image.find(params["image_id"]).destroy
 
-    images = user.images.where.not(:user_img_count => user.image_no)
+    images = user.images.where.not(:user_img_count => user.image_no).order(order: :asc)
 
     return render :json => {STATUS_CODE: OK_STATUS_CODE, user: user, images: images}
   end
