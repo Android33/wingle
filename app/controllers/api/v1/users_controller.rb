@@ -27,7 +27,11 @@ class Api::V1::UsersController < ApplicationController
     #    distance = params[:distance]
     #    hardcode distance 50 km
     distance = 50
-    users = User.near([latitude, longitude], distance, :order => "distance")
+    if latitude == "0.0" && longitude == "0.0"
+      users = User.all.order("id asc").limit(50)
+    else
+      users = User.near([latitude, longitude], distance, :order => "distance")
+    end
     users = users.where.not(:id => user.id)
     if params[:query].present? && params[:query] != ""
       puts "matching users"*20
