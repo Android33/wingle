@@ -74,8 +74,24 @@ class Api::V1::UserinfosController < ApplicationController
       user_info.relation_status = params[:relation_status]
     end
 
+    if user.fsetting
+      fsetting = user.fsetting
+    else
+      fsetting = Fsetting.new
+      fsetting.user_id = user.id
+      fsetting.save
+    end
+
     if params[:interested_in]
       user_info.interested_in = params[:interested_in]
+      if params[:interested_in] == "male" || params[:interested_in] == "Male"
+        fsetting.show_me_of_gender_with_interest = C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_ALL_MEN]
+      elsif params[:interested_in] == "female" || params[:interested_in] == "Female"
+        fsetting.show_me_of_gender_with_interest = C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_ALL_WOMEN]
+      else
+        fsetting.show_me_of_gender_with_interest = C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_ALL]
+      end
+      fsetting.save
     end
 
     if params[:about_me]
