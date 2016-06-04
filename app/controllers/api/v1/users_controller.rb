@@ -515,12 +515,36 @@ class Api::V1::UsersController < ApplicationController
       is_favourite = false
     end
     public_user.authentication_token = nil
-    public_user.gcm_token = nil
 
     last_seen_before_mins = ((Time.now - public_user.last_sign_in_at) / 1.minute).round
     age = ((Time.now - public_user.userinfo.birthday) / 1.year).round
 
-    puts "age #{age}"*80
+    if public_user.gcm_token
+      puts "public_user\n"*10
+      data = {
+          :gcm_type => C::Notifications::TYPE[:checkout],
+          :user_name => user.name,
+          :notification_type => C::Notifications::TYPE[:checkout],
+          :user_id => user.id,
+          :receiver_id => public_user.id
+      }
+      reg_tokens = [public_user.gcm_token]
+      post_args = {
+          # :to field can also be used if there is only 1 reg token to send
+          :registration_ids => reg_tokens,
+          :data => data
+      }
+
+      begin
+        response = RestClient.post 'http://gcm-http.googleapis.com/gcm/send', post_args.to_json,
+                                   :Authorization => 'key=' + C::AUTHORIZE_KEY, :content_type => :json, :accept => :json
+      rescue Exception => e
+        puts "=========Exception starts==========="
+        puts e.message.inspect
+        puts "---json Exception ends-----"
+      end
+    end
+    public_user.gcm_token = nil
 
     if public_user.userinfo
       return render json: {is_favourite: is_favourite, user: public_user, user_info: public_user.userinfo, last_seen_before_mins: last_seen_before_mins, age: age}
