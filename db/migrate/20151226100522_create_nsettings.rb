@@ -7,7 +7,7 @@ class CreateNsettings < ActiveRecord::Migration
       t.boolean :favorite_me, default: true
       t.boolean :msg_alert, default: true
       t.boolean :wingle_alert, default: true
-      t.boolean :member_alert, default: true
+      t.boolean :member_alert, default: false
 
       t.timestamps
     end

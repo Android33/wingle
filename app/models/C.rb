@@ -12,7 +12,7 @@ module C
   end
 
   class Notifications
-    TYPE = {favorite: "favorite", checkout: "checkout", like: "like", chat: "chat"}
+    TYPE = {favorite: "favorite", checkout: "checkout", like: "like", chat: "chat", memberalert: "memberalert"}
   end
 
   class FSettings

@@ -90,6 +90,7 @@ Rails.application.routes.draw do
           post 'create'
           post 'update_wingle_id'
           post 'upload_text_image'
+          post 'create_profile'
         end
       end
 

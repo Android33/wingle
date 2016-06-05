@@ -116,6 +116,100 @@ class Api::V1::UserinfosController < ApplicationController
     render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info, images: images}
   end
 
+  def create_profile
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
+    name = params[:name]
+    if (name.present?)
+      user.name = params[:name]
+      user.save
+    end
+
+    if params[:image_text]
+      image = Image.new
+      image.img = parse_image_data(params[:image_text])
+      image.user_id = user.id
+      image.user_img_count = (user.imagecount + 1) | 1
+      image.save!
+      user.image_id = image.id
+      user.image_no = image.user_img_count
+      user.imagecount = (user.imagecount + 1) | 1
+      user.save
+      # ensure
+        clean_tempfile
+    end
+
+    if user.userinfo
+      user_info = user.userinfo
+    else
+      user_info = Userinfo.new
+      user_info.user_id = user.id
+    end
+
+    if params[:gender]
+      user_info.gender = params[:gender]
+    end
+
+    if params[:birthday]
+      user_info.birthday = params[:birthday]
+    end
+
+    if user.fsetting
+      fsetting = user.fsetting
+    else
+      fsetting = Fsetting.new
+      fsetting.user_id = user.id
+      fsetting.save
+    end
+
+    if params[:interested_in]
+      user_info.interested_in = params[:interested_in]
+      if params[:interested_in] == "male" || params[:interested_in] == "Male"
+        fsetting.show_me_of_gender_with_interest = C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_ALL_MEN]
+      elsif params[:interested_in] == "female" || params[:interested_in] == "Female"
+        fsetting.show_me_of_gender_with_interest = C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_ALL_WOMEN]
+      else
+        fsetting.show_me_of_gender_with_interest = C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_ALL]
+      end
+      fsetting.save
+    end
+    user_info.save
+
+    # GCM starts here
+    gcms_to_notify = User.where("gcm_token is NOT NULL and gcm_token != ''").includes(:nsetting).where(nsettings: { member_alert: true}).pluck(:gcm_token)
+    if gcms_to_notify
+      data = {
+          :gcm_type => C::Notifications::TYPE[:memberalert],
+          :user_name => user.name,
+          :notification_type => C::Notifications::TYPE[:memberalert],
+          :user_id => user.id
+      }
+      reg_tokens = gcms_to_notify.uniq
+      post_args = {
+          # :to field can also be used if there is only 1 reg token to send
+          :registration_ids => reg_tokens,
+          :data => data
+      }
+
+      begin
+        response = RestClient.post 'http://gcm-http.googleapis.com/gcm/send', post_args.to_json,
+                                   :Authorization => 'key=' + C::AUTHORIZE_KEY, :content_type => :json, :accept => :json
+      rescue Exception => e
+        puts "=========Exception starts==========="
+        puts e.message.inspect
+        puts "---json Exception ends-----"
+      end
+    end
+    # GCM ends here
+
+    images = user.images.where.not(:user_img_count => user.image_no).order(order: :asc)
+    render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info, images: images}
+  end
+
   def upload_text_image
     user = User.find_by_email(params[:user_email])
     if params[:user_token] != user.authentication_token

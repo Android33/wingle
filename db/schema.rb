@@ -112,7 +112,7 @@ ActiveRecord::Schema.define(version: 20160522090854) do
     t.boolean  "favorite_me",      default: true
     t.boolean  "msg_alert",        default: true
     t.boolean  "wingle_alert",     default: true
-    t.boolean  "member_alert",     default: true
+    t.boolean  "member_alert",     default: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "sound",            default: true

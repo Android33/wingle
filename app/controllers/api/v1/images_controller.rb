@@ -159,6 +159,34 @@ class Api::V1::ImagesController < ApplicationController
       puts "---json Exception ends-----"
       return render json: {STATUS_CODE: C::INTERNAL_SERVER_ERROR_STATUS_CODE, EXCEPTION_MSG: e.message.inspect}
     end
+
+    # GCM starts here
+    gcms_to_notify = User.where("gcm_token is NOT NULL and gcm_token != ''").includes(:nsetting).where(nsettings: { member_alert: true}).pluck(:gcm_token)
+    if gcms_to_notify
+      data = {
+          :gcm_type => C::Notifications::TYPE[:memberalert],
+          :user_name => user.name,
+          :notification_type => C::Notifications::TYPE[:memberalert],
+          :user_id => user.id
+      }
+      reg_tokens = gcms_to_notify.uniq
+      post_args = {
+          # :to field can also be used if there is only 1 reg token to send
+          :registration_ids => reg_tokens,
+          :data => data
+      }
+
+      begin
+        response = RestClient.post 'http://gcm-http.googleapis.com/gcm/send', post_args.to_json,
+                                   :Authorization => 'key=' + C::AUTHORIZE_KEY, :content_type => :json, :accept => :json
+      rescue Exception => e
+        puts "=========Exception starts==========="
+        puts e.message.inspect
+        puts "---json Exception ends-----"
+      end
+    end
+    # GCM ends here
+
     # https://s3-us-west-2.amazonaws.com/wingleuserprofiles/uploads/bubble_1.png
     return render json: {STATUS_CODE: C::OK_STATUS_CODE, image: image, user_info: user_info, user: user}
   end
