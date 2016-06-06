@@ -52,6 +52,7 @@ class Api::V1::ChatsController < ApplicationController
           :gcm_type => C::Notifications::TYPE[:chat],
           :chat_user => user.name,
           :chat_msg => chat_msg,
+          :chat_img => chat.chatimage_id,
           :sender_id => chat.sender_id,
           :receiver_id => chat.receiver_id
       }
