@@ -52,8 +52,13 @@ class Api::V1::NotificationsController < ApplicationController
 
     # faved_user.gcm_token = "dy_E1yCB8kI:APA91bHzfMcBnNKBYGLPyW0D8soHkXGtQrLVLELbD92TsoJLw6JHgVGpQxqGnouUEx9BJk78LqYUBgh0RYQps7cP7mBL4sJ7weLUb9ObmT6Xb1dgq8kVQvDq-tn1bzCVScrL5JfingbU"
     if liked_user.gcm_token
+      @unseen_notifications_count = 10
+      get_notifications_msgs_count(liked_user)
       data = {
           :gcm_type => C::Notifications::TYPE[:like],
+          :unseen_notifications_count => @unseen_notifications_count,
+          :all_notifications_count => @all_notifications_count,
+          :unseen_msgs_total => @unseen_msgs_total,
           :user_name => user.name,
           :notification_type => C::Notifications::TYPE[:favorite],
           :user_id => user.id,

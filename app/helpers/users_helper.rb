@@ -9,6 +9,50 @@ module UsersHelper
     user.save
   end
 
+  def get_notifications_msgs_count(uzer)
+    @unseen_notifications_count = uzer.notifications.where(:seen => false).count
+    @all_notifications_count = uzer.notifications.count
+    puts "notifications #{uzer.notifications.where(:seen => false).count}"
+
+    all_chats = uzer.chats.all
+    sender_ids = all_chats.pluck(:sender_id).uniq
+    receiver_ids = all_chats.pluck(:receiver_id).uniq
+    #    combine and remove duplicate keys
+    chat_user_ids = sender_ids | receiver_ids
+    #    remove current user id
+    chat_user_ids -= [uzer.id]
+    @unseen_msgs_total = 0
+    chat_user_ids && chat_user_ids.each do |chat_user_id|
+
+      last_msg = uzer.chats.where("sender_id = ? OR receiver_id = ?", chat_user_id.to_i, chat_user_id.to_i).last
+      chat_user = User.find(chat_user_id)
+      chat_object = {}
+
+      if uzer.lastchatseens.where(:sender_id => chat_user_id.to_i).present?
+        lastchatseens = uzer.lastchatseens.where(:sender_id => chat_user_id.to_i).first
+      else
+        lastchatseens = uzer.lastchatseens.new
+        lastchatseens.sender_id = chat_user.id
+        lastchatseens.chat_id = uzer.chats.where(:sender_id => chat_user_id.to_i).first.id
+        lastchatseens.save
+        puts "else lastchatseens #{lastchatseens.inspect}"
+      end
+      if lastchatseens.chat_id.blank? && uzer.chats.where(:sender_id => chat_user_id.to_i).first.present?
+        lastchatseens.chat_id = uzer.chats.where(:sender_id => chat_user_id.to_i).first.id
+        lastchatseens.save
+      end
+
+      if uzer.chats.where(:sender_id => chat_user_id.to_i).present?
+        last_unseen_msg = uzer.chats.find(lastchatseens.chat_id)
+        msgs = uzer.chats.where("sender_id = ? AND created_at >= ?", chat_user_id.to_i, last_unseen_msg.created_at)
+        chat_object["unseen_msgs"] = uzer.chats.where("sender_id = ? AND created_at > ?", chat_user_id.to_i, last_unseen_msg.created_at).count
+      else
+        chat_object["unseen_msgs"] = 0
+      end
+      @unseen_msgs_total += chat_object["unseen_msgs"]
+    end
+  end
+
   USER_INFO_FOUND = "USER_INFO_FOUND";
   NO_USER_INFO = "NO_USER_INFO";
   # //2xx Success

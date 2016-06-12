@@ -520,9 +520,12 @@ class Api::V1::UsersController < ApplicationController
     age = ((Time.now - public_user.userinfo.birthday) / 1.year).round
 
     if public_user.gcm_token
-      puts "public_user\n"*10
+      get_notifications_msgs_count(public_user)
       data = {
           :gcm_type => C::Notifications::TYPE[:checkout],
+          :unseen_notifications_count => @unseen_notifications_count,
+          :all_notifications_count => @all_notifications_count,
+          :unseen_msgs_total => @unseen_msgs_total,
           :user_name => user.name,
           :notification_type => C::Notifications::TYPE[:checkout],
           :user_id => user.id,

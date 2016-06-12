@@ -48,8 +48,12 @@ class Api::V1::ChatsController < ApplicationController
 
     # receiver.gcm_token = "c-Vm5OpwHf4:APA91bEFf_B_nAYGV9fIuVY_A6IcswJ7AzKTvq5QkLP_jgeGzaR0xqhFU0AUYN_FY6UBk2pgEZD1a4nemR78Rp0g219SNOpEiWdSHCGN3WZPSyBmKWCVgK4uzhYMJCMLtVD0yMFHW9yw"
     if receiver.gcm_token
+      get_notifications_msgs_count(receiver)
       data = {
           :gcm_type => C::Notifications::TYPE[:chat],
+          :unseen_notifications_count => @unseen_notifications_count,
+          :all_notifications_count => @all_notifications_count,
+          :unseen_msgs_total => @unseen_msgs_total,
           :chat_user => user.name,
           :chat_msg => chat_msg,
           :chat_img => chat.chatimage_id,
