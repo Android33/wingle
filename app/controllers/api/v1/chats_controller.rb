@@ -225,6 +225,9 @@ class Api::V1::ChatsController < ApplicationController
         last_unseen_msg = user.chats.find(lastchatseens.chat_id)
         msgs = user.chats.where("sender_id = ? AND created_at >= ?", chat_user_id.to_i, last_unseen_msg.created_at)
         chat_object["unseen_msgs"] = user.chats.where("sender_id = ? AND created_at > ?", chat_user_id.to_i, last_unseen_msg.created_at).count
+        if last_unseen_msg.id == user.chats.where(:sender_id => chat_user_id.to_i).first.id
+          chat_object["unseen_msgs"] = chat_object["unseen_msgs"] + 1
+        end
       else
         chat_object["unseen_msgs"] = 0
       end
@@ -293,7 +296,10 @@ class Api::V1::ChatsController < ApplicationController
         msgs = user.chats.where("sender_id = ? AND created_at >= ?", chat_user_id.to_i, last_unseen_msg.created_at)
         puts "msgs"*10
         puts "msgs #{msgs.inspect}"
-        chat_object["unseen_msgs"] = user.chats.where("sender_id = ? AND created_at >= ?", chat_user_id.to_i, last_unseen_msg.created_at).count - 1
+        chat_object["unseen_msgs"] = user.chats.where("sender_id = ? AND created_at > ?", chat_user_id.to_i, last_unseen_msg.created_at).count
+        if last_unseen_msg.id == user.chats.where(:sender_id => chat_user_id.to_i).first.id
+          chat_object["unseen_msgs"] = chat_object["unseen_msgs"] + 1
+        end
       else
         chat_object["unseen_msgs"] = 0
       end

@@ -52,7 +52,9 @@ class Api::V1::NotificationsController < ApplicationController
 
     # faved_user.gcm_token = "dy_E1yCB8kI:APA91bHzfMcBnNKBYGLPyW0D8soHkXGtQrLVLELbD92TsoJLw6JHgVGpQxqGnouUEx9BJk78LqYUBgh0RYQps7cP7mBL4sJ7weLUb9ObmT6Xb1dgq8kVQvDq-tn1bzCVScrL5JfingbU"
     if liked_user.gcm_token
-      @unseen_notifications_count = 10
+      @unseen_notifications_count = 0
+      @all_notifications_count = 0
+      @unseen_msgs_total = 0
       get_notifications_msgs_count(liked_user)
       data = {
           :gcm_type => C::Notifications::TYPE[:like],
@@ -140,54 +142,16 @@ class Api::V1::NotificationsController < ApplicationController
 
   def get_notification_chat_count
     user = User.find_by_email(params[:user_email])
-    if params[:user_token] != user.authentication_token
+    if !user || params[:user_token] != user.authentication_token
       return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
     end
     update_latlong(user, params[:latitude], params[:longitude])
+    @unseen_notifications_count = 0
+    @all_notifications_count = 0
+    @unseen_msgs_total = 0
+    get_notifications_msgs_count(user)
 
-    unseen_notifications_count = user.notifications.where(:seen => false).count
-    all_notifications_count = user.notifications.count
-    puts "notifications #{user.notifications.where(:seen => false).inspect}"
-
-    all_chats = user.chats.all
-    sender_ids = all_chats.pluck(:sender_id).uniq
-    receiver_ids = all_chats.pluck(:receiver_id).uniq
-    #    combine and remove duplicate keys
-    chat_user_ids = sender_ids | receiver_ids
-    #    remove current user id
-    chat_user_ids -= [user.id]
-    unseen_msgs_total = 0
-    chat_user_ids && chat_user_ids.each do |chat_user_id|
-
-      last_msg = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user_id.to_i, chat_user_id.to_i).last
-      chat_user = User.find(chat_user_id)
-      chat_object = {}
-
-      if user.lastchatseens.where(:sender_id => chat_user_id.to_i).present?
-        lastchatseens = user.lastchatseens.where(:sender_id => chat_user_id.to_i).first
-      else
-        lastchatseens = user.lastchatseens.new
-        lastchatseens.sender_id = chat_user.id
-        lastchatseens.chat_id = user.chats.where(:sender_id => chat_user_id.to_i).first.id
-        lastchatseens.save
-        puts "else lastchatseens #{lastchatseens.inspect}"
-      end
-      if lastchatseens.chat_id.blank? && user.chats.where(:sender_id => chat_user_id.to_i).first.present?
-        lastchatseens.chat_id = user.chats.where(:sender_id => chat_user_id.to_i).first.id
-        lastchatseens.save
-      end
-
-      if user.chats.where(:sender_id => chat_user_id.to_i).present?
-        last_unseen_msg = user.chats.find(lastchatseens.chat_id)
-        msgs = user.chats.where("sender_id = ? AND created_at >= ?", chat_user_id.to_i, last_unseen_msg.created_at)
-        chat_object["unseen_msgs"] = user.chats.where("sender_id = ? AND created_at > ?", chat_user_id.to_i, last_unseen_msg.created_at).count
-      else
-        chat_object["unseen_msgs"] = 0
-      end
-      unseen_msgs_total += chat_object["unseen_msgs"]
-    end
-
-    return render :json=> {STATUS_CODE: OK_STATUS_CODE, unseen_notifications_count: unseen_notifications_count,
-      unseen_msgs_total: unseen_msgs_total, all_notifications_count: all_notifications_count}
+    return render :json=> {STATUS_CODE: OK_STATUS_CODE, unseen_notifications_count: @unseen_notifications_count,
+      unseen_msgs_total: @unseen_msgs_total, all_notifications_count: @all_notifications_count}
   end
 end

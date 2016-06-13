@@ -24,7 +24,10 @@ module UsersHelper
     @unseen_msgs_total = 0
     chat_user_ids && chat_user_ids.each do |chat_user_id|
 
-      last_msg = uzer.chats.where("sender_id = ? OR receiver_id = ?", chat_user_id.to_i, chat_user_id.to_i).last
+      last_msg = uzer.chats.where("sender_id = ? ", chat_user_id.to_i).last
+      if last_msg.blank?
+        next
+      end
       chat_user = User.find(chat_user_id)
       chat_object = {}
 
@@ -41,11 +44,12 @@ module UsersHelper
         lastchatseens.chat_id = uzer.chats.where(:sender_id => chat_user_id.to_i).first.id
         lastchatseens.save
       end
-
-      if uzer.chats.where(:sender_id => chat_user_id.to_i).present?
+      if lastchatseens.chat_id && uzer.chats.where(:sender_id => chat_user_id.to_i).present?
         last_unseen_msg = uzer.chats.find(lastchatseens.chat_id)
-        msgs = uzer.chats.where("sender_id = ? AND created_at >= ?", chat_user_id.to_i, last_unseen_msg.created_at)
         chat_object["unseen_msgs"] = uzer.chats.where("sender_id = ? AND created_at > ?", chat_user_id.to_i, last_unseen_msg.created_at).count
+        if last_unseen_msg.id == uzer.chats.where(:sender_id => chat_user_id.to_i).first.id
+          chat_object["unseen_msgs"] = chat_object["unseen_msgs"] + 1
+        end
       else
         chat_object["unseen_msgs"] = 0
       end
