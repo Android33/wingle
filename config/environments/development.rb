@@ -4,10 +4,6 @@ Rails.application.configure do
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development
   # since you don't have to restart the web server when you make code changes.
-  Braintree::Configuration.environment = :sandbox
-  Braintree::Configuration.merchant_id = "tymhbbq2824xmbck"
-  Braintree::Configuration.public_key = "btmwrq39cqq7k9rr"
-  Braintree::Configuration.private_key = "3800225ea9bf3be3f20e8b8c4af233a1"
   config.cache_classes = false
 
   # Do not eager load code on boot.
