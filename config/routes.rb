@@ -43,6 +43,7 @@ Rails.application.routes.draw do
           post 'test_gcm'
           post 'test'
           post 'get_user'
+          post 'reset_password'
         end
       end
 

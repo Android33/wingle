@@ -483,6 +483,15 @@ class Api::V1::UsersController < ApplicationController
     render json: {STATUS_CODE: OK_STATUS_CODE}
   end
 
+  def reset_password
+    user = User.find_by_email(params[:user_email])
+    user.resettoken = (0...8).map { ('a'..'z').to_a[rand(26)] }.join
+    user.save
+
+    PwdResetMailer.reset_token(params[:user_email], user.resettoken).deliver
+    render json: {STATUS_CODE: OK_STATUS_CODE}
+  end
+
   def set_gcm_token
     user = User.find_by_email(params[:user_email])
     if !user || params[:user_token] != user.authentication_token

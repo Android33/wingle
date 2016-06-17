@@ -20,14 +20,14 @@ class Api::V1::RegistrationsController < ApplicationController
     else
       newUser.name = ""
     end
+    newUser.sign_in_count = 0
 
     if params[:login_type].present?
       newUser.login_type = params[:login_type]
     end
 
     token = newUser.authentication_token
-
-    if newUser.save
+    if newUser.save!
       nsetting = Nsetting.new
       nsetting.user_id = newUser.id
       nsetting.save
