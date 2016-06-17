@@ -485,8 +485,12 @@ class Api::V1::UsersController < ApplicationController
 
   def reset_password
     user = User.find_by_email(params[:user_email])
-    user.resettoken = (0...8).map { ('a'..'z').to_a[rand(26)] }.join
-    user.save
+    if user
+      user.resettoken = (0...8).map { ('a'..'z').to_a[rand(26)] }.join
+      user.save
+    else
+      return render json: {STATUS_CODE: FORBIDDEN_STATUS_CODE}
+    end
 
     PwdResetMailer.reset_token(params[:user_email], user.resettoken).deliver
     render json: {STATUS_CODE: OK_STATUS_CODE}
