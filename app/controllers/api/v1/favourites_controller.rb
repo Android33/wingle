@@ -175,6 +175,7 @@ class Api::V1::FavouritesController < ApplicationController
       else
         user_object["is_online"] = false
       end
+      user_object["is_blocked"] = false
       user_object["id"] =  fav_user.id
       user_object["name"] =  fav_user.name
       user_object["surname"] =  fav_user.surname

@@ -47,7 +47,7 @@ module UsersHelper
       if lastchatseens.chat_id && uzer.chats.where(:sender_id => chat_user_id.to_i).present?
         last_unseen_msg = uzer.chats.find(lastchatseens.chat_id)
         chat_object["unseen_msgs"] = uzer.chats.where("sender_id = ? AND created_at > ?", chat_user_id.to_i, last_unseen_msg.created_at).count
-        if last_unseen_msg.id == uzer.chats.where(:sender_id => chat_user_id.to_i).first.id
+        if last_unseen_msg.id == uzer.chats.where(:sender_id => chat_user_id.to_i).first.id && (uzer.chats.where("sender_id = ? AND created_at > ?", uzer.id, last_unseen_msg.created_at).count < 1)
           chat_object["unseen_msgs"] = chat_object["unseen_msgs"] + 1
         end
       else

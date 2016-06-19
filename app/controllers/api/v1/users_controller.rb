@@ -28,17 +28,70 @@ class Api::V1::UsersController < ApplicationController
     #    hardcode distance 50 km
     distance = 50
     if latitude == "0.0" && longitude == "0.0"
-      users = User.all.order("id asc").limit(50)
+      users = User.all.order("id asc").limit(50).joins(:userinfo)
     else
-      users = User.near([latitude, longitude], distance, :order => "distance")
+      users = User.near([latitude, longitude], distance, :order => "distance").joins(:userinfo)
     end
-    users = users.where.not(:id => user.id)
+
+    if user.fsetting
+      fsetting = user.fsetting
+    else
+      fsetting = Fsetting.new
+      fsetting.user_id = user.id
+      fsetting.save
+    end
+
     if params[:query].present? && params[:query] != ""
       puts "matching users"*20
       users = users.where("name ILIKE ?", "%#{params[:query]}%")
     end
 
+    user_interested_in = C::FSettings::GENDER[:FEMALE]
+    user_gender = C::FSettings::GENDER[:MALE]
+
+    if fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_WOMEN_LIKE_MEN]
+      user_interested_in = C::FSettings::GENDER[:MALE]
+      user_gender = C::FSettings::GENDER[:FEMALE]
+
+    elsif fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_WOMEN_LIKE_WOMEN]
+      user_interested_in = C::FSettings::GENDER[:FEMALE]
+      user_gender = C::FSettings::GENDER[:FEMALE]
+
+    elsif fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_ALL_WOMEN]
+      user_interested_in = C::FSettings::GENDER[:UNKNOWN]
+      user_gender = C::FSettings::GENDER[:FEMALE]
+
+    elsif fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_MEN_LIKE_WOMEN]
+      user_interested_in = C::FSettings::GENDER[:FEMALE]
+      user_gender = C::FSettings::GENDER[:MALE]
+
+    elsif fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_MEN_LIKE_MEN]
+      user_interested_in = C::FSettings::GENDER[:MALE]
+      user_gender = C::FSettings::GENDER[:MALE]
+
+    elsif fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_ALL_MEN]
+      user_interested_in = C::FSettings::GENDER[:UNKNOWN]
+      user_gender = C::FSettings::GENDER[:MALE]
+
+    elsif fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_ALL]
+      user_interested_in = C::FSettings::GENDER[:UNKNOWN]
+      user_gender = C::FSettings::GENDER[:UNKNOWN]
+    end
+
+    if user_gender != C::FSettings::GENDER[:UNKNOWN] && user_interested_in != C::FSettings::GENDER[:UNKNOWN]
+        users = users.where("userinfos.gender = ? AND userinfos.interested_in = ?", user_gender, user_interested_in)
+    elsif user_gender == C::FSettings::GENDER[:UNKNOWN] && user_interested_in != C::FSettings::GENDER[:UNKNOWN]
+        users = users.where("userinfos.interested_in = ?", user_interested_in)
+    elsif user_gender == C::FSettings::GENDER[:UNKNOWN] && user_interested_in == C::FSettings::GENDER[:UNKNOWN]
+      users = User.all.limit(50).joins(:userinfo)
+
+    elsif user_gender != C::FSettings::GENDER[:UNKNOWN] && user_interested_in == C::FSettings::GENDER[:UNKNOWN]
+        users = users.where("userinfos.gender = ?", user_gender)
+    end
+
     users_array = []
+    users = users.where.not(name: "", is_account_active: false)
+    users = users.where.not(:id => user.id)
 
     users && users.each do |near_user|
       minutes = ((Time.now - near_user.last_sign_in_at) / 1.minute).round
@@ -256,7 +309,6 @@ class Api::V1::UsersController < ApplicationController
     elsif fsetting.show_me_of_gender_with_interest == C::FSettings::SHOW_ME_OF_GENDER_WITH_INTEREST[:SHOW_ME_ALL]
       user_interested_in = C::FSettings::GENDER[:UNKNOWN]
       user_gender = C::FSettings::GENDER[:UNKNOWN]
-
     end
 
     puts "Info Starts"*10
@@ -302,27 +354,28 @@ class Api::V1::UsersController < ApplicationController
       end
     else
       if user_gender != C::FSettings::GENDER[:UNKNOWN] && user_interested_in != C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity != C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
-          users = User.joins(:userinfo).where("userinfos.gender = ? AND userinfos.interested_in = ? AND userinfos.ethnicity = ?", user_gender, user_interested_in, fsetting.show_me_of_ethnicity)
+          users = User.all.joins(:userinfo).where("userinfos.gender = ? AND userinfos.interested_in = ? AND userinfos.ethnicity = ?", user_gender, user_interested_in, fsetting.show_me_of_ethnicity)
       elsif user_gender == C::FSettings::GENDER[:UNKNOWN] && user_interested_in != C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity != C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
-          users = User.joins(:userinfo).where("userinfos.interested_in = ? AND userinfos.ethnicity = ?", user_interested_in, fsetting.show_me_of_ethnicity)
+          users = User.all.joins(:userinfo).where("userinfos.interested_in = ? AND userinfos.ethnicity = ?", user_interested_in, fsetting.show_me_of_ethnicity)
       elsif user_gender == C::FSettings::GENDER[:UNKNOWN] && user_interested_in == C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity != C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
-          users = User.joins(:userinfo).where("userinfos.ethnicity = ?", fsetting.show_me_of_ethnicity)
+          users = User.all.joins(:userinfo).where("userinfos.ethnicity = ?", fsetting.show_me_of_ethnicity)
       elsif user_gender == C::FSettings::GENDER[:UNKNOWN] && user_interested_in == C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity == C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
-
+        users = User.all.limit(50).joins(:userinfo)
 
       elsif user_gender == C::FSettings::GENDER[:UNKNOWN] && user_interested_in != C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity == C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
-          users = User.joins(:userinfo).where("userinfos.interested_in = ?", user_interested_in)
+          users = User.all.joins(:userinfo).where("userinfos.interested_in = ?", user_interested_in)
       elsif user_gender != C::FSettings::GENDER[:UNKNOWN] && user_interested_in == C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity != C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
-          users = User.joins(:userinfo).where("userinfos.gender = ? AND userinfos.ethnicity = ?", user_gender, fsetting.show_me_of_ethnicity)
+          users = User.all.joins(:userinfo).where("userinfos.gender = ? AND userinfos.ethnicity = ?", user_gender, fsetting.show_me_of_ethnicity)
       elsif user_gender != C::FSettings::GENDER[:UNKNOWN] && user_interested_in == C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity == C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
-          users = User.joins(:userinfo).where("userinfos.gender = ?", user_gender)
+          users = User.all.joins(:userinfo).where("userinfos.gender = ?", user_gender)
 
       elsif user_gender != C::FSettings::GENDER[:UNKNOWN] && user_interested_in != C::FSettings::GENDER[:UNKNOWN] && fsetting.show_me_of_ethnicity == C::FSettings::SHOW_ME_OF_ETHNICITY[:ETHNICITY_ALL]
-          users = User.joins(:userinfo).where("userinfos.gender = ? AND userinfos.interested_in = ?", user_gender, user_interested_in)
+          users = User.all.joins(:userinfo).where("userinfos.gender = ? AND userinfos.interested_in = ?", user_gender, user_interested_in)
       end
     end
 
     if users
+      users = users.where.not(name: "", is_account_active: false)
       users = users.where.not(:id => user.id)
       if params[:query].present? && params[:query] != ""
         puts "matching users"*20
@@ -382,6 +435,7 @@ class Api::V1::UsersController < ApplicationController
 
     user = User.find_by_email(email)
     if user && user.nsetting
+      user.is_account_active = true
       nsetting = user.nsetting
     end
     token = nil
@@ -484,6 +538,19 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def reset_password
+    user = User.find_by_email(params[:user_email])
+    if user && user.resettoken == params[:resettoken]
+      user.password = params[:password]
+      user.resettoken = nil
+      user.save
+    else
+      return render json: {STATUS_CODE: CONFLICT_STATUS_CODE}
+    end
+
+    render json: {STATUS_CODE: OK_STATUS_CODE}
+  end
+
+  def reset_password_token
     user = User.find_by_email(params[:user_email])
     if user
       user.resettoken = (0...8).map { ('a'..'z').to_a[rand(26)] }.join

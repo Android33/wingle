@@ -112,7 +112,7 @@ class Api::V1::NotificationsController < ApplicationController
     end
     update_latlong(user, params[:latitude], params[:longitude])
 
-    notifications = user.notifications.all
+    notifications = user.notifications.all.order(created_at: :desc)
     users_array = []
 
 

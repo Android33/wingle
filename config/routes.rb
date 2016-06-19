@@ -43,6 +43,7 @@ Rails.application.routes.draw do
           post 'test_gcm'
           post 'test'
           post 'get_user'
+          post 'reset_password_token'
           post 'reset_password'
         end
       end
@@ -119,6 +120,7 @@ Rails.application.routes.draw do
           post 'delete'
           post 'delete_all'
           post 'delete_all_chats'
+          post 'update_last_seen'
         end
       end
 

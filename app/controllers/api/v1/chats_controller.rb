@@ -179,11 +179,9 @@ class Api::V1::ChatsController < ApplicationController
     end
     update_latlong(user, params[:latitude], params[:longitude])
 
-    all_chats = user.chats.all
-    sender_ids = all_chats.pluck(:sender_id).uniq
-    receiver_ids = all_chats.pluck(:receiver_id).uniq
-    #    combine and remove duplicate keys
-    chat_user_ids = sender_ids | receiver_ids
+    all_chats = user.chats.all.order(created_at: :desc)
+    chat_user_ids = user.chats.all.order(created_at: :desc).pluck(:sender_id, :receiver_id)
+    chat_user_ids = chat_user_ids.flatten(1).uniq
     #    remove current user id
     chat_user_ids -= [user.id]
     chats_array = []
@@ -225,7 +223,7 @@ class Api::V1::ChatsController < ApplicationController
         last_unseen_msg = user.chats.find(lastchatseens.chat_id)
         msgs = user.chats.where("sender_id = ? AND created_at >= ?", chat_user_id.to_i, last_unseen_msg.created_at)
         chat_object["unseen_msgs"] = user.chats.where("sender_id = ? AND created_at > ?", chat_user_id.to_i, last_unseen_msg.created_at).count
-        if last_unseen_msg.id == user.chats.where(:sender_id => chat_user_id.to_i).first.id
+        if last_unseen_msg.id == user.chats.where(:sender_id => chat_user_id.to_i).first.id && (user.chats.where("sender_id = ? AND created_at > ?", user.id, last_unseen_msg.created_at).count < 1)
           chat_object["unseen_msgs"] = chat_object["unseen_msgs"] + 1
         end
       else
@@ -246,12 +244,11 @@ class Api::V1::ChatsController < ApplicationController
     end
     update_latlong(user, params[:latitude], params[:longitude])
 
-    all_chats = user.chats.all
-    sender_ids = all_chats.pluck(:sender_id).uniq
-    receiver_ids = all_chats.pluck(:receiver_id).uniq
+    chat_user_ids = user.chats.all.order(created_at: :desc).pluck(:sender_id, :receiver_id)
+    chat_user_ids = chat_user_ids.flatten(1).uniq
+
     fav_user_ids = user.favourites.all.pluck(:fav_user_id)
     #    combine and remove duplicate keys
-    chat_user_ids = sender_ids | receiver_ids
     chat_user_ids = chat_user_ids & fav_user_ids
     #    remove current user id
     chat_user_ids -= [user.id]
@@ -297,7 +294,7 @@ class Api::V1::ChatsController < ApplicationController
         puts "msgs"*10
         puts "msgs #{msgs.inspect}"
         chat_object["unseen_msgs"] = user.chats.where("sender_id = ? AND created_at > ?", chat_user_id.to_i, last_unseen_msg.created_at).count
-        if last_unseen_msg.id == user.chats.where(:sender_id => chat_user_id.to_i).first.id
+        if last_unseen_msg.id == user.chats.where(:sender_id => chat_user_id.to_i).first.id && (user.chats.where("sender_id = ? AND created_at > ?", user.id, last_unseen_msg.created_at).count < 1)
           chat_object["unseen_msgs"] = chat_object["unseen_msgs"] + 1
         end
       else
@@ -346,6 +343,40 @@ class Api::V1::ChatsController < ApplicationController
     render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: chat_user.name,
                   chat_user_email: chat_user.email, is_online: is_online, chat_user_id: chat_user.id,
                   chat_user_image_no: chat_user.image_no, chat: chats}
+  end
+
+  def update_last_seen
+    user = User.find_by_email(params[:user_email])
+    if params[:user_token] != user.authentication_token
+      return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
+    end
+    update_latlong(user, params[:latitude], params[:longitude])
+
+    chat_user = User.find(params[:chat_user_id])
+    chats = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user.id, chat_user.id)
+
+    minutes = ((Time.now - chat_user.last_sign_in_at) / 1.minute).round
+    if minutes < 10
+      is_online = true
+    else
+      is_online = false
+    end
+
+    if user.lastchatseens.where(:sender_id => chat_user.id).present?
+      lastchatseens = user.lastchatseens.where(:sender_id => chat_user.id).first
+    else
+      lastchatseens = user.lastchatseens.new
+      lastchatseens.sender_id = chat_user.id
+    end
+
+    if chats.where(:sender_id => chat_user.id).present?
+      lastchatseens.chat_id = chats.where(:sender_id => chat_user.id).last.id
+    end
+    lastchatseens.save
+
+    render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: chat_user.name,
+                  chat_user_email: chat_user.email, is_online: is_online, chat_user_id: chat_user.id,
+                  chat_user_image_no: chat_user.image_no}
   end
 
   def parse_image_data(base64_image)
