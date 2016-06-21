@@ -552,7 +552,7 @@ class Api::V1::UsersController < ApplicationController
 
   def reset_password_token
     user = User.find_by_email(params[:user_email])
-    if user
+    if user && user.login_type == "email"
       user.resettoken = (0...8).map { ('a'..'z').to_a[rand(26)] }.join
       user.save
     else
