@@ -374,9 +374,12 @@ class Api::V1::ChatsController < ApplicationController
     end
     lastchatseens.save
 
+    get_notifications_msgs_count(user)
+
     render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: chat_user.name,
                   chat_user_email: chat_user.email, is_online: is_online, chat_user_id: chat_user.id,
-                  chat_user_image_no: chat_user.image_no}
+                  chat_user_image_no: chat_user.image_no, unseen_notifications_count: @unseen_notifications_count,
+                  all_notifications_count: @all_notifications_count, unseen_msgs_total: @unseen_msgs_total}
   end
 
   def parse_image_data(base64_image)
