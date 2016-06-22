@@ -44,6 +44,9 @@ class Api::V1::ChatsController < ApplicationController
       chat.save
       # ensure
       clean_tempfile
+    else
+      chat.chatimage_id = -1
+      chat.save
     end
 
     # receiver.gcm_token = "c-Vm5OpwHf4:APA91bEFf_B_nAYGV9fIuVY_A6IcswJ7AzKTvq5QkLP_jgeGzaR0xqhFU0AUYN_FY6UBk2pgEZD1a4nemR78Rp0g219SNOpEiWdSHCGN3WZPSyBmKWCVgK4uzhYMJCMLtVD0yMFHW9yw"
@@ -220,7 +223,8 @@ class Api::V1::ChatsController < ApplicationController
       end
 
       if user.chats.where(:sender_id => chat_user_id.to_i).present?
-        last_unseen_msg = user.chats.find(lastchatseens.chat_id)
+
+        last_unseen_msg = user.chats.find_by_id(lastchatseens.chat_id)
         msgs = user.chats.where("sender_id = ? AND created_at >= ?", chat_user_id.to_i, last_unseen_msg.created_at)
         chat_object["unseen_msgs"] = user.chats.where("sender_id = ? AND created_at > ?", chat_user_id.to_i, last_unseen_msg.created_at).count
         if last_unseen_msg.id == user.chats.where(:sender_id => chat_user_id.to_i).first.id && (user.chats.where("sender_id = ? AND created_at > ?", user.id, last_unseen_msg.created_at).count < 1)
