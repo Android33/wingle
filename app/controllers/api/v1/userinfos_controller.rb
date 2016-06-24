@@ -225,6 +225,11 @@ class Api::V1::UserinfosController < ApplicationController
       image.order = (user.imagecount + 1) | 1
       image.save!
       user.imagecount = (user.imagecount + 1) | 1
+      puts "user.image_id: #{user.image_id}"
+      if user.image_id.blank?
+        user.image_id = image.id
+        user.image_no = image.user_img_count
+      end
       user.save
       # ensure
       clean_tempfile
@@ -240,7 +245,7 @@ class Api::V1::UserinfosController < ApplicationController
     images = user.images.where.not(:user_img_count => user.image_no).order(order: :asc)
 
     user_info.save
-    render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info, images: images}
+    render json: {STATUS_CODE: OK_STATUS_CODE, user: user, user_info: user_info, images: images, image_no: user.image_no}
   end
 
   def update_wingle_id

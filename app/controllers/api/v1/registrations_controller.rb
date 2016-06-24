@@ -27,7 +27,7 @@ class Api::V1::RegistrationsController < ApplicationController
     end
 
     token = newUser.authentication_token
-    if newUser.save!
+    if newUser.save
       nsetting = Nsetting.new
       nsetting.user_id = newUser.id
       nsetting.save
