@@ -148,6 +148,8 @@ class Api::V1::FavouritesController < ApplicationController
       else
         user_object["is_blocked"] = false
       end
+      user_object["user_age"] = ((Time.now - fav_user.userinfo.birthday) / 1.year).round
+      user_object["gender"] = fav_user.userinfo.gender
 
       users_array << user_object
     end

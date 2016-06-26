@@ -119,6 +119,8 @@ class Api::V1::UsersController < ApplicationController
       else
         user_object["is_blocked"] = false
       end
+      user_object["user_age"] = ((Time.now - near_user.userinfo.birthday) / 1.year).round
+      user_object["gender"] = near_user.userinfo.gender
 
       users_array << user_object
     end
@@ -421,6 +423,9 @@ class Api::V1::UsersController < ApplicationController
       else
         user_object["is_blocked"] = false
       end
+
+      user_object["user_age"] = ((Time.now - user_info.birthday) / 1.year).round
+      user_object["gender"] = user_info.gender
 
       users_array << user_object
     end
