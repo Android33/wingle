@@ -94,13 +94,9 @@ class Api::V1::NotificationsController < ApplicationController
       return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
     end
     update_latlong(user, params[:latitude], params[:longitude])
-    puts "notification"*80
     notification = Notification.find(params[:notification_id])
-    puts "notification #{notification.inspect}"
     notification.seen = true
     notification.save
-    puts "notification #{notification.inspect}"
-
 
     return render :json=> {STATUS_CODE: OK_STATUS_CODE, notification: notification}
   end

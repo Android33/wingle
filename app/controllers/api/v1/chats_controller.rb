@@ -96,8 +96,6 @@ class Api::V1::ChatsController < ApplicationController
     end
     update_latlong(user, params[:latitude], params[:longitude])
 
-    puts "params #{params.inspect}"
-
     Chat.destroy(params[:chat_msg_id])
     receiver = User.find(params[:receiver_id])
     minutes = ((Time.now - receiver.last_sign_in_at) / 1.minute).round
@@ -160,7 +158,6 @@ class Api::V1::ChatsController < ApplicationController
     chats_array = []
     chat_user_ids && chat_user_ids.each do |chat_user_id|
 
-      puts "before find chats"
       chats = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user_id.to_i, chat_user_id.to_i)
       chat_user = User.find(chat_user_id)
       chat_object = {}
@@ -191,7 +188,6 @@ class Api::V1::ChatsController < ApplicationController
     unseen_msgs_total = 0
     chat_user_ids && chat_user_ids.each do |chat_user_id|
 
-      puts "#{user.id} #{chat_user_id}"
       last_msg = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user_id.to_i, chat_user_id.to_i).last
       chat_user = User.find(chat_user_id)
       chat_object = {}
@@ -237,7 +233,6 @@ class Api::V1::ChatsController < ApplicationController
     unseen_msgs_total = 0
     chat_user_ids && chat_user_ids.each do |chat_user_id|
 
-      puts "before find chats"
       last_msg = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user_id.to_i, chat_user_id.to_i).last
       chat_user = User.find(chat_user_id)
       chat_object = {}

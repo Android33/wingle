@@ -55,7 +55,7 @@ class Api::V1::SessionsController < ApplicationController
                     interested_in: info.interested_in, about_me: info.about_me, wingle_id: info.wingle_id, city: info.city, id: user.id, image_no: user.image_no, images: images,
                     country: info.country, headline: info.headline, address: info.address, birthday: info.birthday}
     else
-      render json: {STATUS_MSG: "NO_USER_INFO", STATUS_CODE: OK_STATUS_CODE, user_token: user.authentication_token, user_email: user.email, name: user.name, image_id: user.image_id, gender: nil, height: nil, images: images, 
+      render json: {STATUS_MSG: "NO_USER_INFO", STATUS_CODE: OK_STATUS_CODE, user_token: user.authentication_token, user_email: user.email, name: user.name, image_id: user.image_id, gender: nil, height: nil, images: images,
                     ethnicity: nil, body_type: nil, relation_status: nil, id: user.id, image_no: user.image_no,
                     interested_in: nil, about_me: nil, wingle_id: nil, city: nil,
                     country: nil, headline: nil, address: nil, birthday: nil}
@@ -75,11 +75,8 @@ class Api::V1::SessionsController < ApplicationController
     if user.valid_password?(current_password) && user.login_type == "email"
       user.password = new_password
       user.save
-      puts "changed\n"*10
       render json: {STATUS_MSG: C::SUCCESS_STATUS_MSG, STATUS_CODE: OK_STATUS_CODE}
     else
-      puts "not changed\n"*10
-      puts user.password
       render json: {STATUS_MSG: C::FAILURE_STATUS_MSG, STATUS_CODE: C::UNAUTHORIZED_STATUS_CODE, login_type: user.login_type}
     end
   end

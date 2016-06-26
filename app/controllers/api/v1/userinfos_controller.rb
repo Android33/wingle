@@ -225,7 +225,6 @@ class Api::V1::UserinfosController < ApplicationController
       image.order = (user.imagecount + 1) | 1
       image.save!
       user.imagecount = (user.imagecount + 1) | 1
-      puts "user.image_id: #{user.image_id}"
       if user.image_id.blank?
         user.image_id = image.id
         user.image_no = image.user_img_count
@@ -256,7 +255,6 @@ class Api::V1::UserinfosController < ApplicationController
     update_latlong(user, params[:latitude], params[:longitude])
 
     wingle_ids = Userinfo.pluck(:wingle_id)
-    puts "wingle_ids #{wingle_ids.inspect}"
     wingle_ids && wingle_ids.each do |wingle_id|
       if wingle_id == params[:wingle_id]
         return render json: {STATUS_CODE: C::CONFLICT_STATUS_CODE, STATUS_MSG: C::WINGLE_ID_NOT_AVAILABLE}

@@ -81,7 +81,6 @@ class Api::V1::FavouritesController < ApplicationController
       # fav_user = User.find(fav_user_id)
       fav_user = User.where("id = ? AND name ILIKE ?",fav_user_id, "%#{params[:query]}%").first
       if fav_user.blank?
-        puts "matching users"*20
         next
       end
       minutes = ((Time.now - fav_user.last_sign_in_at) / 1.minute).round
@@ -119,13 +118,15 @@ class Api::V1::FavouritesController < ApplicationController
     update_latlong(user, params[:latitude], params[:longitude])
 
     user_ids = user.favourites.all.pluck(:fav_user_id)
+    if user.blockeds.pluck(:blocked_user_id).present?
+      user_ids = user_ids - user.blockeds.pluck(:blocked_user_id)
+    end
     users_array = []
 
     user_ids && user_ids.each do |fav_user_id|
       # fav_user = User.find(fav_user_id)
       fav_user = User.where("id = ? AND name ILIKE ?",fav_user_id, "%#{params[:query]}%").first
       if fav_user.blank?
-        puts "matching users"*20
         next
       end
       minutes = ((Time.now - fav_user.last_sign_in_at) / 1.minute).round

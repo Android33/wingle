@@ -42,7 +42,6 @@ class Api::V1::UsersController < ApplicationController
     end
 
     if params[:query].present? && params[:query] != ""
-      puts "matching users"*20
       users = users.where("name ILIKE ?", "%#{params[:query]}%")
     end
 
@@ -92,6 +91,9 @@ class Api::V1::UsersController < ApplicationController
     users_array = []
     users = users.where.not(name: "", is_account_active: false)
     users = users.where.not(:id => user.id)
+    if user.blockeds.pluck(:blocked_user_id).present?
+      users = users.where(["users.id NOT IN (?)", user.blockeds.pluck(:blocked_user_id)])
+    end
 
     users && users.each do |near_user|
       minutes = ((Time.now - near_user.last_sign_in_at) / 1.minute).round
@@ -113,7 +115,6 @@ class Api::V1::UsersController < ApplicationController
       end
 
       blocked_ids = user.blockeds.pluck(:blocked_user_id)
-      puts "blocked_ids #{blocked_ids.inspect}"
       if blocked_ids && (blocked_ids.include? near_user.id)
         user_object["is_blocked"] = true
       else
@@ -199,17 +200,14 @@ class Api::V1::UsersController < ApplicationController
 
     if !distance || distance == 0 || distance == "0"
       users = User.all
-      puts "inside distance 0"
     else
       users = User.near([latitude, longitude], distance, :order => "distance")
     end
 
     users = users.where.not(:id => user.id)
-    # puts "users: #{users.count}"
     users_array = []
     users && users.each do |near_user|
       user_object = {}
-      puts "name: #{near_user.name}"
       user_object["id"] = near_user.id
       user_object["name"] = near_user.name
       user_object["image_no"] = near_user.image_no
@@ -226,7 +224,6 @@ class Api::V1::UsersController < ApplicationController
         # Means only city parameter exists not the age
       elsif age_city == 2
         puts "Means only city parameter exists not the age"
-        puts "user_info.city: #{user_info.city} city: #{city}"
         # Equal ignore case syntax city.casecmp(user_info.city).zero? will return true when strings equal
         next if !city.casecmp(user_info.city).zero?
 
@@ -235,14 +232,9 @@ class Api::V1::UsersController < ApplicationController
         user_age = ((Time.now - user_info.birthday) / 1.year).round
         puts "age: #{age.to_i.class} user_age: #{user_age.class}"
         next if age.to_i != user_age
-        puts "after next age: #{age.to_i.class} user_age: #{user_age.class}"
 
-        puts "before user_info.city: #{user_info.city} city: #{city}"
         next if !city.casecmp(user_info.city).zero?
-        puts "after user_info.city: #{user_info.city} city: #{city}"
       end
-
-      puts "after checks"
 
       minutes = ((Time.now - near_user.last_sign_in_at) / 1.minute).round
       if minutes < 10
@@ -313,13 +305,6 @@ class Api::V1::UsersController < ApplicationController
       user_gender = C::FSettings::GENDER[:UNKNOWN]
     end
 
-    puts "Info Starts"*10
-    puts "user_interested_in #{user_interested_in}"
-    puts "user_gender #{user_gender}"
-    puts "user.latitude #{user.latitude}"
-    puts "user.longitude #{user.longitude}"
-    puts "Info Ends"*10
-
     if fsetting.show_me_close_to == C::FSettings::SHOW_ME_CLOSE_TO[:SHOW_ME_CLOSE_TO_HERE]
       distance = 20
     elsif fsetting.show_me_close_to == C::FSettings::SHOW_ME_CLOSE_TO[:SHOW_ME_CLOSE_TO_CITY]
@@ -378,21 +363,19 @@ class Api::V1::UsersController < ApplicationController
 
     if users
       users = users.where.not(name: "", is_account_active: false)
+      if user.blockeds.pluck(:blocked_user_id).present?
+        users = users.where(["users.id NOT IN (?)", user.blockeds.pluck(:blocked_user_id)])
+      end
       users = users.where.not(:id => user.id)
       if params[:query].present? && params[:query] != ""
-        puts "matching users"*20
         users = users.where("name ILIKE ?", "%#{params[:query]}%")
       end
     end
     # users = users.where("userinfos.birthday < ? AND userinfos.birthday > ?", (Time.now - fsetting.show_me_of_age_min.to_i.year), (Time.now - (fsetting.show_me_of_age_max).to_i.year))
     users_array = []
-    puts "users"*80
-    puts "users #{users.inspect}"
-    # puts "users #{users.count}"
 
     users && users.each do |near_user|
       user_object = {}
-      puts "name: #{near_user.name}"
       user_object["id"] = near_user.id
       user_object["name"] = near_user.name
       user_object["image_no"] = near_user.image_no
@@ -417,7 +400,6 @@ class Api::V1::UsersController < ApplicationController
       end
 
       blocked_ids = user.blockeds.pluck(:blocked_user_id)
-      puts "blocked_ids #{blocked_ids.inspect}"
       if blocked_ids && (blocked_ids.include? near_user.id)
         user_object["is_blocked"] = true
       else
@@ -449,7 +431,6 @@ class Api::V1::UsersController < ApplicationController
         if params[:login_type].present?
           user.login_type = params[:login_type]
         end
-        puts "inside valid password"
         update_latlong(user, params[:latitude], params[:longitude])
         if user.userinfo
           info = user.userinfo
@@ -470,7 +451,6 @@ class Api::V1::UsersController < ApplicationController
       end
     else
       login_type = params[:login_type]
-      puts "inside new"
       if params[:name].present?
         name = params[:name]
       else
