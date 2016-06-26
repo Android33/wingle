@@ -7,8 +7,6 @@ class User < ActiveRecord::Base
   has_many :images
   has_many :favourites
   has_many :blockeds
-  # u.lastchatseens
-  has_many :lastchatseens
   has_many :notifications, foreign_key: 'receiver_id'
   has_and_belongs_to_many :chats
 

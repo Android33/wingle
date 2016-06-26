@@ -21,40 +21,9 @@ module UsersHelper
     chat_user_ids = sender_ids | receiver_ids
     #    remove current user id
     chat_user_ids -= [uzer.id]
-    @unseen_msgs_total = 0
-    chat_user_ids && chat_user_ids.each do |chat_user_id|
 
-      last_msg = uzer.chats.where("sender_id = ? ", chat_user_id.to_i).last
-      if last_msg.blank?
-        next
-      end
-      chat_user = User.find(chat_user_id)
-      chat_object = {}
+    @unseen_msgs_total = uzer.chats.where("receiver_id = ? AND seen = ?", uzer.id, false).count
 
-      if uzer.lastchatseens.where(:sender_id => chat_user_id.to_i).present?
-        lastchatseens = uzer.lastchatseens.where(:sender_id => chat_user_id.to_i).first
-      else
-        lastchatseens = uzer.lastchatseens.new
-        lastchatseens.sender_id = chat_user.id
-        lastchatseens.chat_id = uzer.chats.where(:sender_id => chat_user_id.to_i).first.id
-        lastchatseens.save
-        puts "else lastchatseens #{lastchatseens.inspect}"
-      end
-      if lastchatseens.chat_id.blank? && uzer.chats.where(:sender_id => chat_user_id.to_i).first.present?
-        lastchatseens.chat_id = uzer.chats.where(:sender_id => chat_user_id.to_i).first.id
-        lastchatseens.save
-      end
-      if lastchatseens.chat_id && uzer.chats.where(:sender_id => chat_user_id.to_i).present? && uzer.chats.find_by_id(lastchatseens.chat_id).present?
-        last_unseen_msg = uzer.chats.find_by_id(lastchatseens.chat_id)
-        chat_object["unseen_msgs"] = uzer.chats.where("sender_id = ? AND created_at > ?", chat_user_id.to_i, last_unseen_msg.created_at).count
-        if last_unseen_msg.id == uzer.chats.where(:sender_id => chat_user_id.to_i).first.id && (uzer.chats.where("sender_id = ? AND created_at > ?", uzer.id, last_unseen_msg.created_at).count < 1)
-          chat_object["unseen_msgs"] = chat_object["unseen_msgs"] + 1
-        end
-      else
-        chat_object["unseen_msgs"] = 0
-      end
-      @unseen_msgs_total += chat_object["unseen_msgs"]
-    end
   end
 
   USER_INFO_FOUND = "USER_INFO_FOUND";
