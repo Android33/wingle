@@ -124,9 +124,8 @@ class Api::V1::FavouritesController < ApplicationController
     users_array = []
 
     user_ids && user_ids.each do |fav_user_id|
-      # fav_user = User.find(fav_user_id)
-      fav_user = User.where("id = ? AND name ILIKE ?",fav_user_id, "%#{params[:query]}%").first
-      if fav_user.blank?
+      fav_user = User.find(fav_user_id)
+      if fav_user.blank? || !(User.where("id = ? AND name ILIKE ?",fav_user_id, "%#{params[:query]}%").first || fav_user.userinfo.wingle_id.include?(params[:query]))
         next
       end
       minutes = ((Time.now - fav_user.last_sign_in_at) / 1.minute).round

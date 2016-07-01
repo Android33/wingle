@@ -41,10 +41,6 @@ class Api::V1::UsersController < ApplicationController
       fsetting.save
     end
 
-    if params[:query].present? && params[:query] != ""
-      users = users.where("name ILIKE ?", "%#{params[:query]}%")
-    end
-
     user_interested_in = C::FSettings::GENDER[:FEMALE]
     user_gender = C::FSettings::GENDER[:MALE]
 
@@ -93,6 +89,10 @@ class Api::V1::UsersController < ApplicationController
     users = users.where.not(:id => user.id)
     if user.blockeds.pluck(:blocked_user_id).present?
       users = users.where(["users.id NOT IN (?)", user.blockeds.pluck(:blocked_user_id)])
+    end
+
+    if params[:query].present? && params[:query] != ""
+      users = users.where("name ILIKE ? OR userinfos.wingle_id ILIKE ?", "%#{params[:query]}%", "%#{params[:query]}%")
     end
 
     users && users.each do |near_user|
@@ -368,7 +368,7 @@ class Api::V1::UsersController < ApplicationController
       end
       users = users.where.not(:id => user.id)
       if params[:query].present? && params[:query] != ""
-        users = users.where("name ILIKE ?", "%#{params[:query]}%")
+        users = users.where("name ILIKE ? OR userinfos.wingle_id ILIKE ?", "%#{params[:query]}%", "%#{params[:query]}%")
       end
     end
     # users = users.where("userinfos.birthday < ? AND userinfos.birthday > ?", (Time.now - fsetting.show_me_of_age_min.to_i.year), (Time.now - (fsetting.show_me_of_age_max).to_i.year))

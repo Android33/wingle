@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160625171521) do
+ActiveRecord::Schema.define(version: 20160701042540) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -65,7 +65,7 @@ ActiveRecord::Schema.define(version: 20160625171521) do
   create_table "fsettings", force: true do |t|
     t.integer  "user_id"
     t.string   "show_me_of_gender_with_interest", default: "Everybody"
-    t.string   "show_me_close_to",                default: "SHOW_ME_CLOSE_TO_HERE"
+    t.string   "show_me_close_to",                default: "SHOW_ME_CLOSE_TO_WORLD"
     t.string   "show_me_of_age_min",              default: "18"
     t.string   "show_me_of_age_max",              default: "45"
     t.string   "show_me_of_city"

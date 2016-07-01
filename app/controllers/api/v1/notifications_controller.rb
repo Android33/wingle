@@ -41,6 +41,10 @@ class Api::V1::NotificationsController < ApplicationController
 
     liked_user = User.find(params[:liked_user_id])
 
+    last_like = liked_user.notifications.where(:notification_type => C::Notifications::TYPE[:like]).last
+    if last_like.present? && (((Time.now - last_like.created_at) / 1.minute).round) < 120
+      return render json: {STATUS_CODE: IM_USED_STATUS_CODE, MSG: C::FAILURE_STATUS_MSG}
+    end
 
     notification = Notification.new
     # receiver.notifications.new
