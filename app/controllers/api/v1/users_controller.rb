@@ -95,6 +95,8 @@ class Api::V1::UsersController < ApplicationController
       users = users.where("name ILIKE ? OR userinfos.wingle_id ILIKE ?", "%#{params[:query]}%", "%#{params[:query]}%")
     end
 
+    users = users.order("last_sign_in_at desc")
+
     users && users.each do |near_user|
       minutes = ((Time.now - near_user.last_sign_in_at) / 1.minute).round
       user_object = {}
@@ -373,7 +375,7 @@ class Api::V1::UsersController < ApplicationController
     end
     # users = users.where("userinfos.birthday < ? AND userinfos.birthday > ?", (Time.now - fsetting.show_me_of_age_min.to_i.year), (Time.now - (fsetting.show_me_of_age_max).to_i.year))
     users_array = []
-
+    users = users.order("last_sign_in_at desc")
     users && users.each do |near_user|
       user_object = {}
       user_object["id"] = near_user.id

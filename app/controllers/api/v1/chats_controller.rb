@@ -183,6 +183,9 @@ class Api::V1::ChatsController < ApplicationController
     chat_user_ids = user.chats.all.order(created_at: :desc).pluck(:sender_id, :receiver_id)
     chat_user_ids = chat_user_ids.flatten(1).uniq
     #    remove current user id
+    if user.blockeds.pluck(:blocked_user_id).present?
+      chat_user_ids = chat_user_ids - user.blockeds.pluck(:blocked_user_id)
+    end
     chat_user_ids -= [user.id]
     chats_array = []
     unseen_msgs_total = 0
@@ -228,6 +231,9 @@ class Api::V1::ChatsController < ApplicationController
     #    combine and remove duplicate keys
     chat_user_ids = chat_user_ids & fav_user_ids
     #    remove current user id
+    if user.blockeds.pluck(:blocked_user_id).present?
+      chat_user_ids = chat_user_ids - user.blockeds.pluck(:blocked_user_id)
+    end
     chat_user_ids -= [user.id]
     chats_array = []
     unseen_msgs_total = 0

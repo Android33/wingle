@@ -123,9 +123,10 @@ class Api::V1::FavouritesController < ApplicationController
     end
     users_array = []
 
-    user_ids && user_ids.each do |fav_user_id|
-      fav_user = User.find(fav_user_id)
-      if fav_user.blank? || !(User.where("id = ? AND name ILIKE ?",fav_user_id, "%#{params[:query]}%").first || fav_user.userinfo.wingle_id.include?(params[:query]))
+    users = User.where(id: user_ids).order("last_sign_in_at desc")
+
+    users && users.each do |fav_user|
+      if fav_user.blank? || !(User.where("id = ? AND name ILIKE ?",fav_user.id, "%#{params[:query]}%").first || (fav_user.userinfo.wingle_id && fav_user.userinfo.wingle_id.include?(params[:query])))
         next
       end
       minutes = ((Time.now - fav_user.last_sign_in_at) / 1.minute).round
@@ -143,7 +144,7 @@ class Api::V1::FavouritesController < ApplicationController
       user_object["is_favourite"] =  true
 
       blocked_ids = user.blockeds.pluck(:blocked_user_id)
-      if blocked_ids && (blocked_ids.include? fav_user_id)
+      if blocked_ids && (blocked_ids.include? fav_user.id)
         user_object["is_blocked"] = true
       else
         user_object["is_blocked"] = false
