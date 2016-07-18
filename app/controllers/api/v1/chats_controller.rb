@@ -277,6 +277,7 @@ class Api::V1::ChatsController < ApplicationController
     minutes = ((Time.now - chat_user.last_sign_in_at) / 1.minute).round
 
     chats.where("sender_id = ?", chat_user.id).update_all(seen: true)
+    chats = chats.order(created_at: :asc)
 
     if minutes < 10
       is_online = true

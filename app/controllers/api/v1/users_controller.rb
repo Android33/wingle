@@ -17,7 +17,7 @@ class Api::V1::UsersController < ApplicationController
   def near_users
 
     user = User.find_by_email(params[:user_email])
-    if params[:user_token] != user.authentication_token
+    if !user || params[:user_token] != user.authentication_token
       return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
     end
     update_latlong(user, params[:latitude], params[:longitude])
@@ -583,6 +583,13 @@ class Api::V1::UsersController < ApplicationController
     end
     public_user.authentication_token = nil
 
+    if user.latitude != 0 && user.longitude != 0 && public_user.latitude != 0 && public_user.longitude != 0
+      distance = Geocoder::Calculations.distance_between([user.latitude,user.longitude], [public_user.latitude,public_user.longitude])
+      # distance = Geocoder::Calculations.distance_between([47.858205,2.294359], [40.748433,-73.985655]).round(1)
+    else
+      distance = "Unknown"
+    end
+
     last_seen_before_mins = ((Time.now - public_user.last_sign_in_at) / 1.minute).round
     age = ((Time.now - public_user.userinfo.birthday) / 1.year).round
 
@@ -617,9 +624,11 @@ class Api::V1::UsersController < ApplicationController
     public_user.gcm_token = nil
 
     if public_user.userinfo
-      return render json: {is_favourite: is_favourite, user: public_user, user_info: public_user.userinfo, last_seen_before_mins: last_seen_before_mins, age: age}
+      return render json: {is_favourite: is_favourite, user: public_user, user_info: public_user.userinfo,
+        last_seen_before_mins: last_seen_before_mins, age: age, distance: distance}
     else
-      return render json: {is_favourite: is_favourite, user: public_user, last_seen_before_mins: last_seen_before_mins, age: age}
+      return render json: {is_favourite: is_favourite, user: public_user,
+        last_seen_before_mins: last_seen_before_mins, age: age, distance: distance}
     end
   end
 

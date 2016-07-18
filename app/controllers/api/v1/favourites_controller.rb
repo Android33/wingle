@@ -21,13 +21,22 @@ class Api::V1::FavouritesController < ApplicationController
       fav.save
     end
 
-    notification = Notification.new
-    # receiver.notifications.new
-    # you can call user.notifications.all for receiver notifications
-    notification.receiver_id = faved_user.id
-    notification.sender_id = user.id
-    notification.notification_type = C::Notifications::TYPE[:favorite]
-    notification.save
+    notification = faved_user.notifications.where(:notification_type => C::Notifications::TYPE[:favorite],
+                    :sender_id => user.id)
+    if notification.blank?
+      notification = Notification.new
+      # receiver.notifications.new
+      # you can call user.notifications.all for receiver notifications
+      notification.receiver_id = faved_user.id
+      notification.sender_id = user.id
+      notification.notification_type = C::Notifications::TYPE[:favorite]
+      notification.save
+    else
+      notification = notification.first
+      notification.seen = false
+      notification.save
+    end
+
 
     # faved_user.gcm_token = "dy_E1yCB8kI:APA91bHzfMcBnNKBYGLPyW0D8soHkXGtQrLVLELbD92TsoJLw6JHgVGpQxqGnouUEx9BJk78LqYUBgh0RYQps7cP7mBL4sJ7weLUb9ObmT6Xb1dgq8kVQvDq-tn1bzCVScrL5JfingbU"
     if faved_user.gcm_token
@@ -112,7 +121,7 @@ class Api::V1::FavouritesController < ApplicationController
 
   def all
     user = User.find_by_email(params[:user_email])
-    if params[:user_token] != user.authentication_token
+    if !user || params[:user_token] != user.authentication_token
       return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
     end
     update_latlong(user, params[:latitude], params[:longitude])

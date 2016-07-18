@@ -10,11 +10,22 @@ module UsersHelper
   end
 
   def get_notifications_msgs_count(uzer)
-    @unseen_notifications_count = uzer.notifications.where(:seen => false).count
+    if uzer.blockeds.pluck(:blocked_user_id).present?
+      notifications = uzer.notifications.where.not(sender_id: uzer.blockeds.pluck(:blocked_user_id))
+      @unseen_notifications_count = notifications.where(:seen => false).count
+    else
+      @unseen_notifications_count = uzer.notifications.where(:seen => false).count
+    end
+
     @all_notifications_count = uzer.notifications.count
     puts "notifications #{uzer.notifications.where(:seen => false).count}"
 
-    all_chats = uzer.chats.all
+    if uzer.blockeds.pluck(:blocked_user_id).present?
+      all_chats = uzer.chats.where.not(sender_id: uzer.blockeds.pluck(:blocked_user_id))
+      all_chats = all_chats.where.not(receiver_id: uzer.blockeds.pluck(:blocked_user_id))
+    else
+      all_chats = uzer.chats.all
+    end
     sender_ids = all_chats.pluck(:sender_id).uniq
     receiver_ids = all_chats.pluck(:receiver_id).uniq
     #    combine and remove duplicate keys
@@ -22,7 +33,7 @@ module UsersHelper
     #    remove current user id
     chat_user_ids -= [uzer.id]
 
-    @unseen_msgs_total = uzer.chats.where("receiver_id = ? AND seen = ?", uzer.id, false).count
+    @unseen_msgs_total = all_chats.where("receiver_id = ? AND seen = ?", uzer.id, false).count
 
   end
 

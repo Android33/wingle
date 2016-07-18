@@ -117,6 +117,7 @@ class Api::V1::NotificationsController < ApplicationController
     if user.blockeds.pluck(:blocked_user_id).present?
       notifications = notifications.where.not(sender_id: user.blockeds.pluck(:blocked_user_id))
     end
+    notifications.update_all(seen: true)
 
     notifications && notifications.each do |notification|
       sender_user = User.find(notification.sender_id)
