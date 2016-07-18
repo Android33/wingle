@@ -145,6 +145,11 @@ class Api::V1::FavouritesController < ApplicationController
       else
         user_object["is_online"] = false
       end
+      if user.latitude != 0 && user.longitude != 0 && fav_user.latitude != 0 && fav_user.longitude != 0 && fav_user.nsetting.show_my_location == true
+        user_object["distance"] = Geocoder::Calculations.distance_between([user.latitude,user.longitude], [fav_user.latitude,fav_user.longitude]).round(3)
+      else
+        user_object["distance"] = "Unknown"
+      end
       user_object["id"] =  fav_user.id
       user_object["name"] =  fav_user.name
       user_object["surname"] =  fav_user.surname

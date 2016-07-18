@@ -105,6 +105,11 @@ class Api::V1::UsersController < ApplicationController
       else
         user_object["is_online"] = false
       end
+      if user.latitude != 0 && user.longitude != 0 && near_user.latitude != 0 && near_user.longitude != 0 && near_user.nsetting.show_my_location == true
+        user_object["distance"] = Geocoder::Calculations.distance_between([user.latitude,user.longitude], [near_user.latitude,near_user.longitude]).round(3)
+      else
+        user_object["distance"] = "Unknown"
+      end
       user_object["id"] = near_user.id
       user_object["name"] = near_user.name
       user_object["surname"] = near_user.surname
@@ -385,6 +390,11 @@ class Api::V1::UsersController < ApplicationController
       if !user_info
         next
       end
+      if user.latitude != 0 && user.longitude != 0 && near_user.latitude != 0 && near_user.longitude != 0 && near_user.nsetting.show_my_location == true
+        user_object["distance"] = Geocoder::Calculations.distance_between([user.latitude,user.longitude], [near_user.latitude,near_user.longitude]).round(3)
+      else
+        user_object["distance"] = "Unknown"
+      end
       user_age = ((Time.now - user_info.birthday) / 1.year).round
       next if (user_age > fsetting.show_me_of_age_max.to_i || user_age < fsetting.show_me_of_age_min.to_i)
 
@@ -581,10 +591,16 @@ class Api::V1::UsersController < ApplicationController
     else
       is_favourite = false
     end
+
+    if user.blockeds.where(:blocked_user_id => public_user.id).present?
+      is_blocked = true
+    else
+      is_blocked = false
+    end
     public_user.authentication_token = nil
 
-    if user.latitude != 0 && user.longitude != 0 && public_user.latitude != 0 && public_user.longitude != 0
-      distance = Geocoder::Calculations.distance_between([user.latitude,user.longitude], [public_user.latitude,public_user.longitude])
+    if user.latitude != 0 && user.longitude != 0 && public_user.latitude != 0 && public_user.longitude != 0 && public_user.nsetting.show_my_location == true
+      distance = Geocoder::Calculations.distance_between([user.latitude,user.longitude], [public_user.latitude,public_user.longitude]).round(3)
       # distance = Geocoder::Calculations.distance_between([47.858205,2.294359], [40.748433,-73.985655]).round(1)
     else
       distance = "Unknown"
@@ -625,10 +641,10 @@ class Api::V1::UsersController < ApplicationController
 
     if public_user.userinfo
       return render json: {is_favourite: is_favourite, user: public_user, user_info: public_user.userinfo,
-        last_seen_before_mins: last_seen_before_mins, age: age, distance: distance}
+        last_seen_before_mins: last_seen_before_mins, age: age, distance: distance, is_blocked: is_blocked}
     else
       return render json: {is_favourite: is_favourite, user: public_user,
-        last_seen_before_mins: last_seen_before_mins, age: age, distance: distance}
+        last_seen_before_mins: last_seen_before_mins, age: age, distance: distance, is_blocked: is_blocked}
     end
   end
 

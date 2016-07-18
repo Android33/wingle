@@ -73,7 +73,7 @@ class Api::V1::ChatsController < ApplicationController
       begin
         response = RestClient.post 'http://gcm-http.googleapis.com/gcm/send', post_args.to_json,
                                    :Authorization => 'key=' + C::AUTHORIZE_KEY, :content_type => :json, :accept => :json
-        chats = user.chats.where("sender_id = ? OR receiver_id = ?", receiver.id, receiver.id)
+        chats = user.chats.where("(receiver_id = ? AND sender_delete = ?) OR (sender_id = ? AND receiver_delete = ?)", receiver_id, false, receiver_id, false).order(created_at: :asc)
         render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: receiver.name,
                       chat_user_email: receiver.email, is_online: is_online, chat_user_id: receiver.id, chat_user_image_no: receiver.image_no, chat: chats, MSG: C::SUCCESS_STATUS_MSG}
       rescue Exception => e
@@ -96,7 +96,13 @@ class Api::V1::ChatsController < ApplicationController
     end
     update_latlong(user, params[:latitude], params[:longitude])
 
-    Chat.destroy(params[:chat_msg_id])
+    msg = Chat.find params[:chat_msg_id]
+    if msg.sender_id == user.id
+      msg.sender_delete = true
+    else
+      msg.receiver_delete = true
+    end
+    msg.save
     receiver = User.find(params[:receiver_id])
     minutes = ((Time.now - receiver.last_sign_in_at) / 1.minute).round
     if minutes < 10
@@ -105,7 +111,7 @@ class Api::V1::ChatsController < ApplicationController
       is_online = false
     end
 
-    chats = user.chats.where("sender_id = ? OR receiver_id = ?", receiver.id, receiver.id)
+    chats = user.chats.where("(receiver_id = ? AND sender_delete = ?) OR (sender_id = ? AND receiver_delete = ?)", receiver.id, false, receiver.id, false)
 
 
     render json: {STATUS_CODE: OK_STATUS_CODE, chat_user_name: receiver.name,
@@ -122,8 +128,8 @@ class Api::V1::ChatsController < ApplicationController
     puts "params #{params.inspect}"
 
 
-    chats = user.chats.where("sender_id = ? OR receiver_id = ?", params[:receiver_id], params[:receiver_id])
-    chats.destroy_all
+    user.chats.where("receiver_id = ?", params[:receiver_id]).update_all(sender_delete: true)
+    user.chats.where("sender_id = ?", params[:receiver_id]).update_all(receiver_delete: true)
 
 
     render json: {STATUS_CODE: OK_STATUS_CODE, MSG: C::SUCCESS_STATUS_MSG}
@@ -136,7 +142,8 @@ class Api::V1::ChatsController < ApplicationController
     end
     update_latlong(user, params[:latitude], params[:longitude])
 
-    user.chats.destroy_all
+    user.chats.where("receiver_id = ?", user.id).update_all(receiver_delete: true)
+    user.chats.where("sender_id = ?", user.id).update_all(sender_delete: true)
 
     render json: {STATUS_CODE: OK_STATUS_CODE, MSG: C::SUCCESS_STATUS_MSG}
   end
@@ -179,8 +186,8 @@ class Api::V1::ChatsController < ApplicationController
     end
     update_latlong(user, params[:latitude], params[:longitude])
 
-    all_chats = user.chats.all.order(created_at: :desc)
-    chat_user_ids = user.chats.all.order(created_at: :desc).pluck(:sender_id, :receiver_id)
+    all_chats = user.chats.where("(sender_id = ? AND sender_delete = ?) OR (receiver_id = ? AND receiver_delete = ?)", user.id, false, user.id, false)
+    chat_user_ids = all_chats.order(created_at: :desc).pluck(:sender_id, :receiver_id)
     chat_user_ids = chat_user_ids.flatten(1).uniq
     #    remove current user id
     if user.blockeds.pluck(:blocked_user_id).present?
@@ -223,8 +230,9 @@ class Api::V1::ChatsController < ApplicationController
       return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
     end
     update_latlong(user, params[:latitude], params[:longitude])
+    all_chats = user.chats.where("(sender_id = ? AND sender_delete = ?) OR (receiver_id = ? AND receiver_delete = ?)", user.id, false, user.id, false)
 
-    chat_user_ids = user.chats.all.order(created_at: :desc).pluck(:sender_id, :receiver_id)
+    chat_user_ids = all_chats.order(created_at: :desc).pluck(:sender_id, :receiver_id)
     chat_user_ids = chat_user_ids.flatten(1).uniq
 
     fav_user_ids = user.favourites.all.pluck(:fav_user_id)
@@ -272,7 +280,8 @@ class Api::V1::ChatsController < ApplicationController
     update_latlong(user, params[:latitude], params[:longitude])
 
     chat_user = User.find(params[:chat_user_id])
-    chats = user.chats.where("sender_id = ? OR receiver_id = ?", chat_user.id, chat_user.id)
+
+    chats = user.chats.where("(receiver_id = ? AND sender_delete = ?) OR (sender_id = ? AND receiver_delete = ?)", chat_user.id, false, chat_user.id, false)
 
     minutes = ((Time.now - chat_user.last_sign_in_at) / 1.minute).round
 

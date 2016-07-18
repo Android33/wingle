@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160701042540) do
+ActiveRecord::Schema.define(version: 20160718215309) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -43,7 +43,9 @@ ActiveRecord::Schema.define(version: 20160701042540) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "chatimage_id"
-    t.boolean  "seen",         default: false
+    t.boolean  "seen",            default: false
+    t.boolean  "receiver_delete", default: false
+    t.boolean  "sender_delete",   default: false
   end
 
   create_table "chats_users", id: false, force: true do |t|
