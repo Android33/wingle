@@ -43,10 +43,12 @@ class Api::V1::ImagesController < ApplicationController
       return render json: {STATUS_CODE: UNAUTHORIZED_STATUS_CODE}
     end
     update_latlong(user, params[:latitude], params[:longitude])
-    user_ = User.find(params[:user_id])
-    images = user_.images.all
+    other_user = User.find(params[:user_id])
+    profile_image = other_user.images.where(:user_img_count => other_user.image_no)
+    other_images = other_user.images.where.not(:user_img_count => other_user.image_no).order(order: :asc)
+    images = profile_image + other_images
 
-    return render :json => {STATUS_CODE: OK_STATUS_CODE, images: images, name: user_.name}
+    return render :json => {STATUS_CODE: OK_STATUS_CODE, images: images, name: other_user.name}
   end
 
   def change_dp
